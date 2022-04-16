@@ -40,17 +40,21 @@ class Triangles(arcade.Window):
         self.glines = self.get_lines_coords()
         self.triangle_texts = self.get_triangle_texts()
 
+        self.is_show_solution = False
+
     def on_draw(self):
         self.clear()
 
         self.draw_board()
         self.draw_triangles()
         self.draw_start_end()
-        self.draw_line()
+        self.draw_solution()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             arcade.close_window()
+        elif symbol == arcade.key.H:
+            self.is_show_solution = not self.is_show_solution
 
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
@@ -84,8 +88,10 @@ class Triangles(arcade.Window):
                                   cfg.line_width * 0.5,
                                   cfg.board_color)
 
-    def draw_line(self):
-        arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.line], cfg.line_color, line_width=10)
+    def draw_solution(self):
+        if self.is_show_solution:
+            arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.line],
+                                   cfg.line_color, line_width=10)
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
