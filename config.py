@@ -11,7 +11,8 @@ start_radius = 24
 bg_color = arcade.color.SMOKY_BLACK
 board_color = (130, 110, 45)
 cell_color = arcade.color.SMOKY_BLACK
-line_color = arcade.color.RED
+solution_color = arcade.color.RED
 triangle_color = arcade.color.YELLOW
+line_color = (254, 213, 135)
 
 hide_triangle_probability = 0.4

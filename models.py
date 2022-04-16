@@ -12,7 +12,7 @@ class Board:
         self.width = width
         self.height = height
         self.cells: List[List[int]] = []
-        self.line: List[Node] = []
+        self.solution_line: List[Node] = []
         self.start = (0, 0)
         self.end = (width, height)
 
@@ -20,7 +20,7 @@ class Board:
         y, x = self.end
         pg = PathGenerator(self.width, self.height, self.start, (x, y))
         pg.generate_paths()
-        self.line = pg.pick_random_path(min_len=self.width * self.height)
+        self.solution_line = pg.pick_random_path(min_len=self.width * self.height)
 
     def get_all_paths(self):
         pass
@@ -33,7 +33,7 @@ class Board:
                 self.cells[i].append(self.get_triangle_value(i, j))
 
     def get_triangle_value(self, i: int, j: int) -> int:
-        all_sublines = [(x, y) for x, y in zip(self.line[:-1], self.line[1:])]
+        all_sublines = [(x, y) for x, y in zip(self.solution_line[:-1], self.solution_line[1:])]
         corner_sw = (i, j)
         corner_nw = (i + 1, j)
         corner_ne = (i + 1, j + 1)

@@ -5,7 +5,7 @@ import arcade
 
 import config as cfg
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, TITLE
-from models import Board
+from models import Board, Node
 
 Coords = Tuple[float, float]
 
@@ -41,6 +41,7 @@ class Triangles(arcade.Window):
         self.triangle_texts = self.get_triangle_texts()
 
         self.is_show_solution = False
+        self.line: List[Node] = [self.board.start]
 
     def on_draw(self):
         self.clear()
@@ -48,6 +49,7 @@ class Triangles(arcade.Window):
         self.draw_board()
         self.draw_triangles()
         self.draw_start_end()
+        self.draw_line()
         self.draw_solution()
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -55,6 +57,36 @@ class Triangles(arcade.Window):
             arcade.close_window()
         elif symbol == arcade.key.H:
             self.is_show_solution = not self.is_show_solution
+        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN):
+            x, y = self.line[-1]
+
+            if symbol == arcade.key.LEFT:
+                move = (x, y - 1)
+            elif symbol == arcade.key.UP:
+                move = (x + 1, y)
+            elif symbol == arcade.key.RIGHT:
+                move = (x, y + 1)
+            elif symbol == arcade.key.DOWN:
+                move = (x - 1, y)
+
+            # noinspection PyUnboundLocalVariable
+            if self.is_reverting(move):
+                self.line = self.line[:-1]
+            elif self.is_valid_move(move):
+                self.line += (move, )
+
+    def is_reverting(self, move: Node) -> bool:
+        return len(self.line) >= 2 and move == self.line[-2]
+
+    def is_valid_move(self, move: Node) -> bool:
+        x, y = move
+        if not (0 <= x <= self.board.height and 0 <= y <= self.board.width):
+            return False
+
+        if move in self.line:
+            return False
+
+        return True
 
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
@@ -90,8 +122,12 @@ class Triangles(arcade.Window):
 
     def draw_solution(self):
         if self.is_show_solution:
-            arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.line],
-                                   cfg.line_color, line_width=10)
+            arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.solution_line],
+                                   cfg.solution_color, line_width=10)
+
+    def draw_line(self):
+        arcade.draw_line_strip([self.glines[x][y] for x, y in self.line],
+                               cfg.line_color, line_width=10)
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
