@@ -13,3 +13,5 @@ board_color = (130, 110, 45)
 cell_color = arcade.color.SMOKY_BLACK
 line_color = arcade.color.RED
 triangle_color = arcade.color.YELLOW
+
+hide_triangle_probability = 0.4

@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple
 
 import arcade
@@ -7,6 +8,19 @@ from config import WINDOW_WIDTH, WINDOW_HEIGHT, TITLE
 from models import Board
 
 Coords = Tuple[float, float]
+
+
+class TriangleText(arcade.Text):
+    def __init__(self, value: int, start_x: float, start_y: float):
+        super().__init__(f'{value}', start_x, start_y, cfg.triangle_color,
+                         font_size=16, anchor_x='center', anchor_y='center')
+
+        self.is_visible = True
+
+        if value == 0:
+            self.is_visible = False
+        elif random.random() < cfg.hide_triangle_probability:
+            self.is_visible = False
 
 
 class Triangles(arcade.Window):
@@ -24,6 +38,7 @@ class Triangles(arcade.Window):
         self.bottom_left_y = (WINDOW_HEIGHT - self.gboard_height) / 2
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
+        self.triangle_texts = self.get_triangle_texts()
 
     def on_draw(self):
         self.clear()
@@ -46,13 +61,9 @@ class Triangles(arcade.Window):
                 arcade.draw_xywh_rectangle_filled(x, y, cfg.cell_size, cfg.cell_size, cfg.cell_color)
 
     def draw_triangles(self):
-        for row, grow in zip(self.board.cells, self.gcells):
-            for cell, gcell in zip(row, grow):
-                x, y = gcell
-                x += cfg.cell_size / 2
-                y += cfg.cell_size / 2
-                arcade.draw_text(f'{cell}', x, y, cfg.triangle_color,
-                                 font_size=16, anchor_x='center', anchor_y='center')
+        for triangle in self.triangle_texts:
+            if triangle.is_visible:
+                triangle.draw()
 
     def draw_start_end(self):
         # todo support custom end
@@ -104,6 +115,17 @@ class Triangles(arcade.Window):
 
             curr_y += cfg.cell_size + cfg.line_width
         return coords
+
+    def get_triangle_texts(self) -> List[TriangleText]:
+        result = []
+        for row, grow in zip(self.board.cells, self.gcells):
+            for cell, gcell in zip(row, grow):
+                x, y = gcell
+                x += cfg.cell_size / 2
+                y += cfg.cell_size / 2
+                result.append(TriangleText(cell, x, y))
+
+        return result
 
 
 def main():
