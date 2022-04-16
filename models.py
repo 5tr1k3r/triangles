@@ -21,7 +21,6 @@ class Board:
         pg = PathGenerator(self.width, self.height, self.start, (x, y))
         pg.generate_paths()
         self.line = pg.pick_random_path(min_len=self.width * self.height)
-        print(self.line)
 
     def get_all_paths(self):
         pass
