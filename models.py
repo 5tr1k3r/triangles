@@ -7,6 +7,24 @@ Node = Tuple[int, int]
 FullPath = List[Node]
 
 
+def get_triangle_value(i: int, j: int, line: FullPath) -> int:
+    all_sublines = [(x, y) for x, y in zip(line[:-1], line[1:])]
+    corner_sw = (i, j)
+    corner_nw = (i + 1, j)
+    corner_ne = (i + 1, j + 1)
+    corner_se = (i, j + 1)
+    all_possible_neighbor_lines = {(corner_sw, corner_nw),
+                                   (corner_nw, corner_sw),
+                                   (corner_nw, corner_ne),
+                                   (corner_ne, corner_nw),
+                                   (corner_ne, corner_se),
+                                   (corner_se, corner_ne),
+                                   (corner_se, corner_sw),
+                                   (corner_sw, corner_se)}
+
+    return len(all_possible_neighbor_lines.intersection(set(all_sublines)))
+
+
 class Board:
     def __init__(self, width: int, height: int):
         self.width = width
@@ -30,24 +48,7 @@ class Board:
             self.cells.append([])
 
             for j in range(self.height):
-                self.cells[i].append(self.get_triangle_value(i, j))
-
-    def get_triangle_value(self, i: int, j: int) -> int:
-        all_sublines = [(x, y) for x, y in zip(self.solution_line[:-1], self.solution_line[1:])]
-        corner_sw = (i, j)
-        corner_nw = (i + 1, j)
-        corner_ne = (i + 1, j + 1)
-        corner_se = (i, j + 1)
-        all_possible_neighbor_lines = {(corner_sw, corner_nw),
-                                       (corner_nw, corner_sw),
-                                       (corner_nw, corner_ne),
-                                       (corner_ne, corner_nw),
-                                       (corner_ne, corner_se),
-                                       (corner_se, corner_ne),
-                                       (corner_se, corner_sw),
-                                       (corner_sw, corner_se)}
-
-        return len(all_possible_neighbor_lines.intersection(set(all_sublines)))
+                self.cells[i].append(get_triangle_value(i, j, self.solution_line))
 
 
 class PathGenerator:

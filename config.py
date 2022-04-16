@@ -14,5 +14,6 @@ cell_color = arcade.color.SMOKY_BLACK
 solution_color = arcade.color.RED
 triangle_color = arcade.color.YELLOW
 line_color = (254, 213, 135)
+solved_line_color = (254, 158, 1)
 
 hide_triangle_probability = 0.4
