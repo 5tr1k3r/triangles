@@ -55,7 +55,8 @@ class Triangles(arcade.Window):
 
         self.draw_board()
         self.draw_triangles()
-        self.draw_start_end()
+        self.draw_start()
+        self.draw_exit()
         self.draw_line()
         self.draw_solution()
 
@@ -63,7 +64,7 @@ class Triangles(arcade.Window):
         self.check_validation()
 
     def check_validation(self):
-        if self.line[-1] == self.board.end:
+        if self.line[-1] == self.board.exit:
             if not self.is_validated_line:
                 self.is_solved = self.check_solution()
                 self.is_validated_line = True
@@ -129,24 +130,67 @@ class Triangles(arcade.Window):
             if triangle.is_visible:
                 triangle.draw()
 
-    def draw_start_end(self):
-        # todo support custom end
+    def draw_start(self):
+        self.draw_circle_at_position(self.board.start[1], self.board.start[0], cfg.board_color)
+
+    def draw_exit(self):
+        x, y = self.board.exit
+        dim_a = cfg.line_width * 0.75
+        dim_b = cfg.line_width * 0.5
+        offset_x = y * (cfg.cell_size + cfg.line_width)
+        offset_y = x * (cfg.cell_size + cfg.line_width)
+
+        # bottom or top
+        if x in (0, self.board.height):
+            rect_x = self.bottom_left_x
+            circle_x = rect_x + dim_b
+
+            if x == self.board.height:
+                rect_y = self.bottom_left_y + self.gboard_height
+                circle_y = rect_y + dim_a
+            else:
+                rect_y = self.bottom_left_y - dim_a
+                circle_y = rect_y
+
+            arcade.draw_xywh_rectangle_filled(rect_x + offset_x, rect_y,
+                                              cfg.line_width, dim_a, cfg.board_color)
+            arcade.draw_circle_filled(circle_x + offset_x, circle_y,
+                                      dim_b, cfg.board_color)
+
+        # left or right
+        elif y in (0, self.board.width):
+            rect_y = self.bottom_left_y
+            circle_y = rect_y + dim_b
+
+            if y == self.board.width:
+                rect_x = self.bottom_left_x + self.gboard_width
+                circle_x = rect_x + dim_a
+            else:
+                rect_x = self.bottom_left_x - dim_a
+                circle_x = rect_x
+
+            arcade.draw_xywh_rectangle_filled(rect_x, rect_y + offset_y,
+                                              dim_a, cfg.line_width, cfg.board_color)
+            arcade.draw_circle_filled(circle_x, circle_y + offset_y,
+                                      dim_b, cfg.board_color)
+
+        # middle of the board
+        else:
+            self.draw_rectangle_at_position(y, x, cfg.board_color)
+
+    def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
         start_x = self.bottom_left_x + cfg.line_width / 2
         start_y = self.bottom_left_y + cfg.line_width / 2
-        arcade.draw_circle_filled(start_x + (self.board.start[1] * (cfg.cell_size + cfg.line_width)),
-                                  start_y + (self.board.start[0] * (cfg.cell_size + cfg.line_width)),
-                                  cfg.start_radius, cfg.board_color)
+        arcade.draw_circle_filled(start_x + (x * (cfg.cell_size + cfg.line_width)),
+                                  start_y + (y * (cfg.cell_size + cfg.line_width)),
+                                  cfg.start_radius, color)
 
-        top_right_x = self.bottom_left_x + self.gboard_width
-        top_right_y = self.bottom_left_y + self.gboard_height
-        arcade.draw_xywh_rectangle_filled(top_right_x - cfg.line_width,
-                                          top_right_y,
-                                          cfg.line_width, cfg.line_width * 0.75,
-                                          cfg.board_color)
-        arcade.draw_circle_filled(top_right_x - cfg.line_width * 0.5,
-                                  top_right_y + cfg.line_width * 0.75,
-                                  cfg.line_width * 0.5,
-                                  cfg.board_color)
+    def draw_rectangle_at_position(self, x: int, y: int, color: arcade.Color):
+        start_x = self.bottom_left_x + cfg.line_width / 2
+        start_y = self.bottom_left_y + cfg.line_width / 2
+        arcade.draw_rectangle_filled(start_x + (x * (cfg.cell_size + cfg.line_width)),
+                                     start_y + (y * (cfg.cell_size + cfg.line_width)),
+                                     cfg.start_radius * 2, cfg.start_radius * 2, color)
 
     def draw_solution(self):
         if self.is_show_solution:

@@ -34,11 +34,16 @@ class Board:
         self.cells: List[List[int]] = []
         self.solution_line: List[Node] = []
         self.start = tuple(cfg.board_start)
-        self.end = (width, height)
+        if cfg.board_exit is None:
+            self.exit = (width, height)
+        else:
+            self.exit = tuple(cfg.board_exit)
+
+        if self.start == self.exit:
+            raise RuntimeError('start and exit should be different')
 
     def generate_line(self):
-        y, x = self.end
-        pg = PathGenerator(self.width, self.height, self.start, (x, y))
+        pg = PathGenerator(self.width, self.height, self.start, self.exit)
         pg.generate_paths()
         if not pg.paths:
             raise RuntimeError('no paths were generated')

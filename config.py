@@ -25,6 +25,7 @@ solved_line_color = (254, 158, 1)
 board_width = cc.get('board_width', 4)
 board_height = cc.get('board_height', 4)
 board_start = cc.get('board_start', [0, 0])
+board_exit = cc.get('board_exit', None)     # by default the exit is at the top right corner
 
 hide_triangle_probability = cc.get('hide_triangle_probability', 0.4)
 max_paths_generated = cc.get('max_paths_generated', 10000)
