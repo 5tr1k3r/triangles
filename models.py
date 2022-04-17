@@ -1,7 +1,9 @@
 import random
+import time
 from typing import Tuple, List, Set
 
-# from utils import timeit
+import config as cfg
+from utils import timeit
 
 Node = Tuple[int, int]
 FullPath = List[Node]
@@ -38,7 +40,10 @@ class Board:
         y, x = self.end
         pg = PathGenerator(self.width, self.height, self.start, (x, y))
         pg.generate_paths()
-        self.solution_line = pg.pick_random_path(min_len=self.width * self.height)
+        if not pg.paths:
+            raise RuntimeError('no paths were generated')
+
+        self.solution_line = pg.pick_random_path()
 
     def get_all_paths(self):
         pass
@@ -61,9 +66,25 @@ class PathGenerator:
         self.obstacles = self.add_obstacles(0)
         self.paths: List[FullPath] = []
 
-    # @timeit
+    @timeit
     def generate_paths(self):
-        self.paths = [p for p in self.dfs_paths(self.start)]
+        suitable_paths_count = 0
+        min_len = self.w * self.h
+        time_end = time.time() + cfg.generation_time_limit
+
+        for path in self.dfs_paths(self.start):
+            if len(path) >= min_len:
+                self.paths.append(path)
+                suitable_paths_count += 1
+
+            if suitable_paths_count >= cfg.max_paths_generated:
+                print(f'generated {suitable_paths_count} paths')
+                break
+
+            if time.time() > time_end:
+                print(f'time limit exceeded ({cfg.generation_time_limit}s), '
+                      f'generated {suitable_paths_count} paths')
+                break
 
     def dfs_paths(self, start: Node, path=None):
         if path is None:
@@ -116,8 +137,8 @@ class PathGenerator:
 
         return result
 
-    def pick_random_path(self, min_len: int):
-        return random.choice([p for p in self.paths if len(p) >= min_len])
+    def pick_random_path(self):
+        return random.choice(self.paths)
 
 
 def test_obstacles():
@@ -133,10 +154,24 @@ def test_obstacles():
     print(total_path_count / n)
 
 
+def compare_generated_paths():
+    x = 7
+    pg_a = PathGenerator(x, x, (0, 0), (x, x))
+    pg_a.generate_paths()
+    paths_a = set([''.join(f"{x}{y}" for x, y in path) for path in pg_a.paths])
+
+    pg_b = PathGenerator(x, x, (0, 0), (x, x))
+    pg_b.generate_paths()
+    paths_b = set([''.join(f"{x}{y}" for x, y in path) for path in pg_b.paths])
+
+    print(f'total path count {len(paths_a)}')
+    if paths_a == paths_b:
+        print('completely equal paths generated')
+    else:
+        print(f'there is {len(paths_a - paths_b)} paths A that dont exist in paths B')
+
+
 if __name__ == '__main__':
     # board = Board(width=2, height=2)
 
-    s = 4
-    g = PathGenerator(2, 4, (0, 0), (4, 2))
-    g.generate_paths()
-    g.display_paths()
+    compare_generated_paths()
