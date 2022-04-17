@@ -33,7 +33,7 @@ class Board:
         self.height = height
         self.cells: List[List[int]] = []
         self.solution_line: List[Node] = []
-        self.start = (0, 0)
+        self.start = tuple(cfg.board_start)
         self.end = (width, height)
 
     def generate_line(self):
