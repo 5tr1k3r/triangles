@@ -35,7 +35,7 @@ class Board:
         self.solution_line: List[Node] = []
         self.start = tuple(cfg.board_start)
         if cfg.board_exit is None:
-            self.exit = (width, height)
+            self.exit = (height, width)
         else:
             self.exit = tuple(cfg.board_exit)
 
