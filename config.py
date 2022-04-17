@@ -7,8 +7,8 @@ try:
 except FileNotFoundError:
     cc = {}
 
-window_width = cc.get('window_width', 1000)
-window_height = cc.get('window_height', 1000)
+window_width = cc.get('window_width', 800)
+window_height = cc.get('window_height', 800)
 
 cell_size = cc.get('cell_size', 70)
 line_width = cc.get('line_width', 20)
