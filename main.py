@@ -133,8 +133,8 @@ class Triangles(arcade.Window):
         # todo support custom end
         start_x = self.bottom_left_x + cfg.line_width / 2
         start_y = self.bottom_left_y + cfg.line_width / 2
-        arcade.draw_circle_filled(start_x + (self.board.start[0] * (cfg.cell_size + cfg.line_width)),
-                                  start_y + (self.board.start[1] * (cfg.cell_size + cfg.line_width)),
+        arcade.draw_circle_filled(start_x + (self.board.start[1] * (cfg.cell_size + cfg.line_width)),
+                                  start_y + (self.board.start[0] * (cfg.cell_size + cfg.line_width)),
                                   cfg.start_radius, cfg.board_color)
 
         top_right_x = self.bottom_left_x + self.gboard_width
