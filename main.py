@@ -4,7 +4,7 @@ from typing import List, Tuple
 import arcade
 
 import config as cfg
-from config import WINDOW_WIDTH, WINDOW_HEIGHT, TITLE
+from config import window_width, window_height
 from models import Board, Node, get_triangle_value
 
 Coords = Tuple[float, float]
@@ -30,7 +30,7 @@ class TriangleText(arcade.Text):
 
 class Triangles(arcade.Window):
     def __init__(self):
-        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE, center_window=True)
+        super().__init__(window_width, window_height, 'Triangles', center_window=True)
 
         arcade.set_background_color(cfg.bg_color)
         self.board = Board(width=4, height=4)
@@ -39,8 +39,8 @@ class Triangles(arcade.Window):
 
         self.gboard_width = cfg.cell_size * self.board.width + cfg.line_width * (self.board.width + 1)
         self.gboard_height = cfg.cell_size * self.board.height + cfg.line_width * (self.board.height + 1)
-        self.bottom_left_x = (WINDOW_WIDTH - self.gboard_width) / 2
-        self.bottom_left_y = (WINDOW_HEIGHT - self.gboard_height) / 2
+        self.bottom_left_x = (window_width - self.gboard_width) / 2
+        self.bottom_left_y = (window_height - self.gboard_height) / 2
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
         self.triangle_texts = self.get_triangle_texts()
