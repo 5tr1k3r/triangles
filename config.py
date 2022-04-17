@@ -22,4 +22,6 @@ triangle_color = arcade.color.YELLOW
 line_color = (254, 213, 135)
 solved_line_color = (254, 158, 1)
 
+board_width = cc.get('board_width', 4)
+board_height = cc.get('board_height', 4)
 hide_triangle_probability = cc.get('hide_triangle_probability', 0.4)

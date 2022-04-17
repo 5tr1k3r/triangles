@@ -33,7 +33,7 @@ class Triangles(arcade.Window):
         super().__init__(window_width, window_height, 'Triangles', center_window=True)
 
         arcade.set_background_color(cfg.bg_color)
-        self.board = Board(width=4, height=4)
+        self.board = Board(width=cfg.board_width, height=cfg.board_height)
         self.board.generate_line()
         self.board.find_triangle_values()
 
