@@ -80,8 +80,10 @@ class PathGenerator:
 
         return {(x, y) for x, y in all_neighbors if 0 <= x <= self.h and 0 <= y <= self.w}
 
-    def get_candidates(self, start: Node, path: FullPath) -> Set[Node]:
-        return self.get_neighbors(start) - set(path) - self.obstacles
+    def get_candidates(self, start: Node, path: FullPath) -> List[Node]:
+        result = list(self.get_neighbors(start) - set(path) - self.obstacles)
+        random.shuffle(result)
+        return result
 
     def display_paths(self):
         if len(self.paths) == 0:
