@@ -83,6 +83,8 @@ class Triangles(arcade.Window):
             arcade.close_window()
         elif symbol == arcade.key.H:
             self.is_show_solution = not self.is_show_solution
+        elif symbol == arcade.key.R:
+            self.line = [self.board.start]
         elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN):
             x, y = self.line[-1]
 
