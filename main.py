@@ -1,5 +1,6 @@
 import random
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import List, Tuple, Optional
 
 import arcade
 
@@ -28,6 +29,17 @@ class TriangleText(arcade.Text):
             self.is_visible = False
 
 
+@dataclass
+class GExitData:
+    rect_x: float
+    rect_y: float
+    rect_w: float
+    rect_h: float
+    circle_x: float
+    circle_y: float
+    circle_radius: float
+
+
 class Triangles(arcade.Window):
     def __init__(self):
         super().__init__(window_width, window_height, 'Triangles', center_window=True)
@@ -44,6 +56,7 @@ class Triangles(arcade.Window):
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
         self.triangle_texts = self.get_triangle_texts()
+        self.exit_data = self.get_exit_data()
 
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
@@ -134,49 +147,19 @@ class Triangles(arcade.Window):
         self.draw_circle_at_position(self.board.start[1], self.board.start[0], cfg.board_color)
 
     def draw_exit(self):
-        x, y = self.board.exit
-        dim_a = cfg.line_width * 0.75
-        dim_b = cfg.line_width * 0.5
-        offset_x = y * (cfg.cell_size + cfg.line_width)
-        offset_y = x * (cfg.cell_size + cfg.line_width)
-
-        # bottom or top
-        if x in (0, self.board.height):
-            rect_x = self.bottom_left_x
-            circle_x = rect_x + dim_b
-
-            if x == self.board.height:
-                rect_y = self.bottom_left_y + self.gboard_height
-                circle_y = rect_y + dim_a
-            else:
-                rect_y = self.bottom_left_y - dim_a
-                circle_y = rect_y
-
-            arcade.draw_xywh_rectangle_filled(rect_x + offset_x, rect_y,
-                                              cfg.line_width, dim_a, cfg.board_color)
-            arcade.draw_circle_filled(circle_x + offset_x, circle_y,
-                                      dim_b, cfg.board_color)
-
-        # left or right
-        elif y in (0, self.board.width):
-            rect_y = self.bottom_left_y
-            circle_y = rect_y + dim_b
-
-            if y == self.board.width:
-                rect_x = self.bottom_left_x + self.gboard_width
-                circle_x = rect_x + dim_a
-            else:
-                rect_x = self.bottom_left_x - dim_a
-                circle_x = rect_x
-
-            arcade.draw_xywh_rectangle_filled(rect_x, rect_y + offset_y,
-                                              dim_a, cfg.line_width, cfg.board_color)
-            arcade.draw_circle_filled(circle_x, circle_y + offset_y,
-                                      dim_b, cfg.board_color)
-
-        # middle of the board
+        if self.exit_data:
+            arcade.draw_xywh_rectangle_filled(self.exit_data.rect_x,
+                                              self.exit_data.rect_y,
+                                              self.exit_data.rect_w,
+                                              self.exit_data.rect_h,
+                                              cfg.board_color)
+            arcade.draw_circle_filled(self.exit_data.circle_x,
+                                      self.exit_data.circle_y,
+                                      self.exit_data.circle_radius,
+                                      cfg.board_color)
         else:
-            self.draw_rectangle_at_position(y, x, cfg.board_color)
+            # middle of the board
+            self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], cfg.board_color)
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
         start_x = self.bottom_left_x + cfg.line_width / 2
@@ -241,6 +224,50 @@ class Triangles(arcade.Window):
                 result.append(TriangleText(cell, i, j, x, y))
 
         return result
+
+    def get_exit_data(self) -> Optional[GExitData]:
+        x, y = self.board.exit
+        dim_a = cfg.line_width * 0.75
+        dim_b = cfg.line_width * 0.5
+        offset_x = y * (cfg.cell_size + cfg.line_width)
+        offset_y = x * (cfg.cell_size + cfg.line_width)
+
+        # bottom or top
+        if x in (0, self.board.height):
+            rect_x = self.bottom_left_x
+            circle_x = rect_x + dim_b
+
+            if x == self.board.height:
+                rect_y = self.bottom_left_y + self.gboard_height
+                circle_y = rect_y + dim_a
+            else:
+                rect_y = self.bottom_left_y - dim_a
+                circle_y = rect_y
+
+            return GExitData(rect_x=rect_x + offset_x, rect_y=rect_y,
+                             rect_w=cfg.line_width, rect_h=dim_a,
+                             circle_x=circle_x + offset_x, circle_y=circle_y,
+                             circle_radius=dim_b)
+
+        # left or right
+        elif y in (0, self.board.width):
+            rect_y = self.bottom_left_y
+            circle_y = rect_y + dim_b
+
+            if y == self.board.width:
+                rect_x = self.bottom_left_x + self.gboard_width
+                circle_x = rect_x + dim_a
+            else:
+                rect_x = self.bottom_left_x - dim_a
+                circle_x = rect_x
+
+            return GExitData(rect_x=rect_x, rect_y=rect_y + offset_y,
+                             rect_w=dim_a, rect_h=cfg.line_width,
+                             circle_x=circle_x, circle_y=circle_y + offset_y,
+                             circle_radius=dim_b)
+
+        # middle of the board
+        return
 
 
 def main():
