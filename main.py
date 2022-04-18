@@ -15,7 +15,7 @@ class TriangleText(arcade.Text):
     def __init__(self, num: int, x: int, y: int,
                  start_x: float, start_y: float):
         super().__init__(f'{num}', start_x, start_y, cfg.triangle_color,
-                         font_size=16, anchor_x='center', anchor_y='center')
+                         font_size=cfg.triangle_text_size, anchor_x='center', anchor_y='center')
 
         self.num = num
         self.cell_x = x
@@ -46,11 +46,11 @@ class Triangles(arcade.Window):
 
         arcade.set_background_color(cfg.bg_color)
         self.board = Board(width=cfg.board_width, height=cfg.board_height)
-        self.board.generate_line()
+        self.board.generate_solution_line()
         self.board.find_triangle_values()
 
-        self.gboard_width = cfg.cell_size * self.board.width + cfg.line_width * (self.board.width + 1)
-        self.gboard_height = cfg.cell_size * self.board.height + cfg.line_width * (self.board.height + 1)
+        self.gboard_width = cfg.cell_size * self.board.width + cfg.lane_width * (self.board.width + 1)
+        self.gboard_height = cfg.cell_size * self.board.height + cfg.lane_width * (self.board.height + 1)
         self.bottom_left_x = (window_width - self.gboard_width) / 2
         self.bottom_left_y = (window_height - self.gboard_height) / 2
         self.gcells = self.get_cell_coords()
@@ -162,56 +162,56 @@ class Triangles(arcade.Window):
             self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], cfg.board_color)
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
-        start_x = self.bottom_left_x + cfg.line_width / 2
-        start_y = self.bottom_left_y + cfg.line_width / 2
-        arcade.draw_circle_filled(start_x + (x * (cfg.cell_size + cfg.line_width)),
-                                  start_y + (y * (cfg.cell_size + cfg.line_width)),
+        start_x = self.bottom_left_x + cfg.lane_width / 2
+        start_y = self.bottom_left_y + cfg.lane_width / 2
+        arcade.draw_circle_filled(start_x + (x * (cfg.cell_size + cfg.lane_width)),
+                                  start_y + (y * (cfg.cell_size + cfg.lane_width)),
                                   cfg.start_radius, color)
 
     def draw_rectangle_at_position(self, x: int, y: int, color: arcade.Color):
-        start_x = self.bottom_left_x + cfg.line_width / 2
-        start_y = self.bottom_left_y + cfg.line_width / 2
-        arcade.draw_rectangle_filled(start_x + (x * (cfg.cell_size + cfg.line_width)),
-                                     start_y + (y * (cfg.cell_size + cfg.line_width)),
+        start_x = self.bottom_left_x + cfg.lane_width / 2
+        start_y = self.bottom_left_y + cfg.lane_width / 2
+        arcade.draw_rectangle_filled(start_x + (x * (cfg.cell_size + cfg.lane_width)),
+                                     start_y + (y * (cfg.cell_size + cfg.lane_width)),
                                      cfg.start_radius * 2, cfg.start_radius * 2, color)
 
     def draw_solution(self):
         if self.is_show_solution:
             arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.solution_line],
-                                   cfg.solution_color, line_width=10)
+                                   cfg.solution_color, line_width=cfg.player_line_width)
 
     def draw_line(self):
         color = cfg.solved_line_color if self.is_solved else cfg.line_color
         arcade.draw_line_strip([self.glines[x][y] for x, y in self.line],
-                               color, line_width=10)
+                               color, line_width=cfg.player_line_width)
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
-        curr_y = self.bottom_left_y + cfg.line_width
+        curr_y = self.bottom_left_y + cfg.lane_width
         for j in range(self.board.height):
             coords.append([])
-            curr_x = self.bottom_left_x + cfg.line_width
+            curr_x = self.bottom_left_x + cfg.lane_width
 
             for i in range(self.board.width):
                 coords[j].append((curr_x, curr_y))
-                curr_x += cfg.cell_size + cfg.line_width
+                curr_x += cfg.cell_size + cfg.lane_width
 
-            curr_y += cfg.cell_size + cfg.line_width
+            curr_y += cfg.cell_size + cfg.lane_width
 
         return coords
 
     def get_lines_coords(self) -> List[List[Coords]]:
         coords = []
-        curr_y = self.bottom_left_y + (cfg.line_width / 2)
+        curr_y = self.bottom_left_y + (cfg.lane_width / 2)
         for j in range(self.board.height + 1):
             coords.append([])
-            curr_x = self.bottom_left_x + (cfg.line_width / 2)
+            curr_x = self.bottom_left_x + (cfg.lane_width / 2)
 
             for i in range(self.board.width + 1):
                 coords[j].append((curr_x, curr_y))
-                curr_x += cfg.cell_size + cfg.line_width
+                curr_x += cfg.cell_size + cfg.lane_width
 
-            curr_y += cfg.cell_size + cfg.line_width
+            curr_y += cfg.cell_size + cfg.lane_width
         return coords
 
     def get_triangle_texts(self) -> List[TriangleText]:
@@ -227,10 +227,10 @@ class Triangles(arcade.Window):
 
     def get_exit_data(self) -> Optional[GExitData]:
         x, y = self.board.exit
-        dim_a = cfg.line_width * 0.75
-        dim_b = cfg.line_width * 0.5
-        offset_x = y * (cfg.cell_size + cfg.line_width)
-        offset_y = x * (cfg.cell_size + cfg.line_width)
+        dim_a = cfg.lane_width * 0.75
+        dim_b = cfg.lane_width * 0.5
+        offset_x = y * (cfg.cell_size + cfg.lane_width)
+        offset_y = x * (cfg.cell_size + cfg.lane_width)
 
         # bottom or top
         if x in (0, self.board.height):
@@ -245,7 +245,7 @@ class Triangles(arcade.Window):
                 circle_y = rect_y
 
             return GExitData(rect_x=rect_x + offset_x, rect_y=rect_y,
-                             rect_w=cfg.line_width, rect_h=dim_a,
+                             rect_w=cfg.lane_width, rect_h=dim_a,
                              circle_x=circle_x + offset_x, circle_y=circle_y,
                              circle_radius=dim_b)
 
@@ -262,7 +262,7 @@ class Triangles(arcade.Window):
                 circle_x = rect_x
 
             return GExitData(rect_x=rect_x, rect_y=rect_y + offset_y,
-                             rect_w=dim_a, rect_h=cfg.line_width,
+                             rect_w=dim_a, rect_h=cfg.lane_width,
                              circle_x=circle_x, circle_y=circle_y + offset_y,
                              circle_radius=dim_b)
 

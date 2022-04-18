@@ -48,16 +48,13 @@ class Board:
         if not (0 <= self.exit[0] <= self.height and 0 <= self.exit[1] <= self.width):
             raise RuntimeError('exit is not within the board dimensions')
 
-    def generate_line(self):
+    def generate_solution_line(self):
         pg = PathGenerator(self.width, self.height, self.start, self.exit)
         pg.generate_paths()
         if not pg.paths:
             raise RuntimeError('no paths were generated')
 
         self.solution_line = pg.pick_random_path()
-
-    def get_all_paths(self):
-        pass
 
     def find_triangle_values(self):
         for i in range(self.width):

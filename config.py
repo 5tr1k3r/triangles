@@ -11,8 +11,10 @@ window_width = cc.get('window_width', 800)
 window_height = cc.get('window_height', 800)
 
 cell_size = cc.get('cell_size', 70)
-line_width = cc.get('line_width', 20)
+lane_width = cc.get('line_width', 20)
 start_radius = cc.get('start_radius', 24)
+player_line_width = cc.get('player_line_width', 10)
+triangle_text_size = cc.get('triangle_text_size', 16)
 
 bg_color = arcade.color.SMOKY_BLACK
 board_color = (130, 110, 45)
