@@ -23,9 +23,7 @@ class TriangleText(arcade.Text):
 
         self.is_visible = True
 
-        if num == 0:
-            self.is_visible = False
-        elif random.random() < cfg.hide_triangle_probability:
+        if num == 0 or random.random() < cfg.hide_triangle_probability:
             self.is_visible = False
 
 
