@@ -48,15 +48,19 @@ class Board:
         if not (0 <= self.exit[0] <= self.height and 0 <= self.exit[1] <= self.width):
             raise RuntimeError('exit is not within the board dimensions')
 
-    def generate_solution_line(self):
-        pg = PathGenerator(self.width, self.height, self.start, self.exit)
-        pg.generate_paths()
-        if not pg.paths:
+        self.pg = None
+
+    def generate_paths(self):
+        self.pg = PathGenerator(self.width, self.height, self.start, self.exit)
+        self.pg.run()
+        if not self.pg.paths:
             raise RuntimeError('no paths were generated')
 
-        self.solution_line = pg.pick_random_path()
+    def get_solution_line(self):
+        self.solution_line = self.pg.pick_random_path()
 
     def find_triangle_values(self):
+        self.cells = []
         for i in range(self.width):
             self.cells.append([])
 
@@ -75,7 +79,7 @@ class PathGenerator:
         self.paths: List[FullPath] = []
 
     # @timeit
-    def generate_paths(self):
+    def run(self):
         total_path_count = 0
         suitable_paths_count = 0
         min_len = self.w * self.h
@@ -177,11 +181,11 @@ def test_obstacles():
 def compare_generated_paths():
     x = 7
     pg_a = PathGenerator(x, x, (0, 0), (x, x))
-    pg_a.generate_paths()
+    pg_a.run()
     paths_a = set([''.join(f"{x}{y}" for x, y in path) for path in pg_a.paths])
 
     pg_b = PathGenerator(x, x, (0, 0), (x, x))
-    pg_b.generate_paths()
+    pg_b.run()
     paths_b = set([''.join(f"{x}{y}" for x, y in path) for path in pg_b.paths])
 
     print(f'total path count {len(paths_a)}')

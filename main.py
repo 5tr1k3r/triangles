@@ -46,8 +46,7 @@ class Triangles(arcade.Window):
 
         arcade.set_background_color(cfg.bg_color)
         self.board = Board(width=cfg.board_width, height=cfg.board_height)
-        self.board.generate_solution_line()
-        self.board.find_triangle_values()
+        self.board.generate_paths()
 
         self.gboard_width = cfg.cell_size * self.board.width + cfg.lane_width * (self.board.width + 1)
         self.gboard_height = cfg.cell_size * self.board.height + cfg.lane_width * (self.board.height + 1)
@@ -55,11 +54,23 @@ class Triangles(arcade.Window):
         self.bottom_left_y = (window_height - self.gboard_height) / 2
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
-        self.triangle_texts = self.get_triangle_texts()
         self.exit_data = self.get_exit_data()
 
+        self.triangle_texts: List[TriangleText] = []
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
+        self.is_solved = False
+        self.is_validated_line = False
+
+        self.start_new_puzzle()
+
+    def start_new_puzzle(self):
+        self.board.get_solution_line()
+        self.board.find_triangle_values()
+        self.triangle_texts = self.get_triangle_texts()
+
+        self.is_show_solution = False
+        self.line = [self.board.start]
         self.is_solved = False
         self.is_validated_line = False
 
@@ -116,6 +127,8 @@ class Triangles(arcade.Window):
                 self.line = self.line[:-1]
             elif self.is_valid_move(move):
                 self.line += (move,)
+        elif symbol == arcade.key.SPACE:
+            self.start_new_puzzle()
 
     def is_reverting(self, move: Node) -> bool:
         return len(self.line) >= 2 and move == self.line[-2]
