@@ -71,7 +71,7 @@ class PathGenerator:
         self.start = start
         self.end = end
 
-        self.obstacles = self.add_obstacles(0)
+        self.obstacles = self.add_obstacles(cfg.obstacles_count)
         self.paths: List[FullPath] = []
 
     # @timeit

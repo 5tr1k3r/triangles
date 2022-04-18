@@ -32,3 +32,4 @@ board_exit = cc.get('board_exit', None)     # by default the exit is at the top 
 hide_triangle_probability = cc.get('hide_triangle_probability', 0.4)
 max_paths_generated = cc.get('max_paths_generated', 10000)
 generation_time_limit = cc.get('generation_time_limit', 1.0)
+obstacles_count = cc.get('obstacles_count', 0)
