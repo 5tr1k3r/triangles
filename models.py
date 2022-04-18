@@ -3,7 +3,7 @@ import time
 from typing import Tuple, List, Set
 
 import config as cfg
-from utils import timeit
+# from utils import timeit
 
 Node = Tuple[int, int]
 FullPath = List[Node]
@@ -71,25 +71,37 @@ class PathGenerator:
         self.obstacles = self.add_obstacles(0)
         self.paths: List[FullPath] = []
 
-    @timeit
+    # @timeit
     def generate_paths(self):
+        total_path_count = 0
         suitable_paths_count = 0
         min_len = self.w * self.h
         time_end = time.time() + cfg.generation_time_limit
+        explored_all_paths = True
 
         for path in self.dfs_paths(self.start):
+            total_path_count += 1
+
             if len(path) >= min_len:
                 self.paths.append(path)
                 suitable_paths_count += 1
 
             if suitable_paths_count >= cfg.max_paths_generated:
-                print(f'generated {suitable_paths_count} paths')
+                explored_all_paths = False
                 break
 
             if time.time() > time_end:
-                print(f'time limit exceeded ({cfg.generation_time_limit}s), '
-                      f'generated {suitable_paths_count} paths')
+                print(f'time limit exceeded ({cfg.generation_time_limit}s)')
+                explored_all_paths = False
                 break
+
+        gen_text = f'generated {suitable_paths_count} suitable paths'
+
+        if explored_all_paths:
+            print(f'total path count: {total_path_count}')
+            print(f'{gen_text} ({(suitable_paths_count / total_path_count):.1%})')
+        else:
+            print(gen_text)
 
     def dfs_paths(self, start: Node, path=None):
         if path is None:
