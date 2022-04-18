@@ -90,16 +90,21 @@ class Triangles(arcade.Window):
             if not self.is_validated_line:
                 self.is_solved = self.check_solution()
                 self.is_validated_line = True
-        else:
+        elif self.is_validated_line:
             self.is_validated_line = False
             self.is_solved = False
 
+            for triangle in [t for t in self.triangle_texts if t.is_visible]:
+                triangle.color = cfg.triangle_color
+
     def check_solution(self) -> bool:
+        success = True
         for triangle in [t for t in self.triangle_texts if t.is_visible]:
             if triangle.num != get_triangle_value(triangle.cell_x, triangle.cell_y, self.line):
-                return False
+                triangle.color = cfg.wrong_triangle_color
+                success = False
 
-        return True
+        return success
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:

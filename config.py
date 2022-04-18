@@ -21,6 +21,7 @@ board_color = (130, 110, 45)
 cell_color = arcade.color.SMOKY_BLACK
 solution_color = arcade.color.RED + (170,)
 triangle_color = arcade.color.YELLOW
+wrong_triangle_color = arcade.color.RED
 line_color = (254, 213, 135)
 solved_line_color = (254, 158, 1)
 
