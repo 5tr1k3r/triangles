@@ -42,6 +42,12 @@ class Board:
         if self.start == self.exit:
             raise RuntimeError('start and exit should be different')
 
+        if not (0 <= self.start[0] <= self.height and 0 <= self.start[1] <= self.width):
+            raise RuntimeError('start is not within the board dimensions')
+
+        if not (0 <= self.exit[0] <= self.height and 0 <= self.exit[1] <= self.width):
+            raise RuntimeError('exit is not within the board dimensions')
+
     def generate_line(self):
         pg = PathGenerator(self.width, self.height, self.start, self.exit)
         pg.generate_paths()
