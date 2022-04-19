@@ -70,6 +70,7 @@ class Triangles(arcade.Window):
         self.popup = None
         self.was_solution_shown = False
         self.was_given_space_warning = False
+        self.puzzle_times: List[float] = []
 
         self.start_new_puzzle()
 
@@ -138,6 +139,7 @@ class Triangles(arcade.Window):
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
+            self.display_final_stats()
             arcade.close_window()
         elif symbol == arcade.key.H:
             self.was_solution_shown = True
@@ -283,7 +285,9 @@ class Triangles(arcade.Window):
                              anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
 
     def show_resulting_time(self):
-        text = f'Puzzle {self.puzzle_index} solved! Took {(time.time() - self.puzzle_start_time):.1f}s'
+        result_time = time.time() - self.puzzle_start_time
+        self.puzzle_times.append(result_time)
+        text = f'Puzzle {self.puzzle_index} solved! Took {result_time:.1f}s'
         if self.was_solution_shown:
             text += ' and solution reveal'
         elif self.hints_used:
@@ -406,6 +410,11 @@ class Triangles(arcade.Window):
         chosen_hint = random.choice(valid_hint_choices)
         self.hints_used.add(chosen_hint)
         self.hints += self.board.solution_line[chosen_hint:chosen_hint+2]
+
+    def display_final_stats(self):
+        puzzles_solved = len(self.puzzle_times)
+        print(f'Solved {puzzles_solved} puzzles total, '
+              f'avg solving time {(sum(self.puzzle_times) / puzzles_solved):.1f}s')
 
 
 def main():
