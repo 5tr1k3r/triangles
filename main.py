@@ -413,8 +413,9 @@ class Triangles(arcade.Window):
 
     def display_final_stats(self):
         puzzles_solved = len(self.puzzle_times)
-        print(f'Solved {puzzles_solved} puzzles total, '
-              f'avg solving time {(sum(self.puzzle_times) / puzzles_solved):.1f}s')
+        if puzzles_solved or True:
+            print(f'Solved {puzzles_solved} puzzles total, '
+                  f'avg solving time {(sum(self.puzzle_times) / puzzles_solved):.1f}s')
 
 
 def main():
