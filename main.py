@@ -1,7 +1,7 @@
 import random
 import time
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Set
 
 import arcade
 
@@ -58,6 +58,8 @@ class Triangles(arcade.Window):
         self.triangle_texts: List[TriangleText] = []
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
+        self.hints: List[Node] = []
+        self.hints_used: Set[int] = set()
         self.is_solved = False
         self.is_validated_line = False
         self.has_been_solved_already = False
@@ -77,6 +79,8 @@ class Triangles(arcade.Window):
 
         self.is_show_solution = False
         self.line = [self.board.start]
+        self.hints = []
+        self.hints_used = set()
         self.is_solved = False
         self.is_validated_line = False
         self.has_been_solved_already = False
@@ -94,6 +98,7 @@ class Triangles(arcade.Window):
         self.draw_start()
         self.draw_exit()
         self.draw_line()
+        self.draw_hints()
         self.draw_solution()
         self.draw_help_tip()
 
@@ -163,6 +168,8 @@ class Triangles(arcade.Window):
             self.start_new_puzzle()
         elif symbol == arcade.key.F1:
             self.is_help_screen = True
+        elif symbol == arcade.key.E:
+            self.get_hint()
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.F1:
@@ -236,6 +243,11 @@ class Triangles(arcade.Window):
         arcade.draw_line_strip([self.glines[x][y] for x, y in self.line],
                                color, line_width=cfg.player_line_width)
 
+    def draw_hints(self):
+        if self.hints:
+            arcade.draw_lines([self.glines[x][y] for x, y in self.hints],
+                              arcade.color.GREEN + (100,), line_width=cfg.player_line_width)
+
     @staticmethod
     def draw_help_tip():
         arcade.draw_text(f'F1 - Help',
@@ -261,6 +273,7 @@ class Triangles(arcade.Window):
                 f'{"arrows/WASD":<{cfg.help_pad}}move line',
                 f'{"Space":<{cfg.help_pad}}start new puzzle',
                 f'{"R":<{cfg.help_pad}}reset line',
+                f'{"E":<{cfg.help_pad}}get a hint',
                 f'{"H":<{cfg.help_pad}}show solution',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
@@ -271,6 +284,10 @@ class Triangles(arcade.Window):
         text = f'Puzzle {self.puzzle_index} solved! Took {(time.time() - self.puzzle_start_time):.1f}s'
         if self.was_solution_shown:
             text += ' and solution reveal'
+        elif self.hints_used:
+            num = len(self.hints_used)
+            s = 's' if num > 1 else ''
+            text += f' and {num} hint{s}'
         print(text)
         self.result_text = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.result_top_margin,
                                        anchor_x='center', anchor_y='center',
@@ -364,6 +381,17 @@ class Triangles(arcade.Window):
 
         # middle of the board
         return
+
+    def get_hint(self):
+        all_solution_segments = set(range(len(self.board.solution_line) - 1))
+        valid_hint_choices = list(all_solution_segments - self.hints_used)
+        if not valid_hint_choices:
+            print('ran out of hints :D')
+            return
+
+        chosen_hint = random.choice(valid_hint_choices)
+        self.hints_used.add(chosen_hint)
+        self.hints += self.board.solution_line[chosen_hint:chosen_hint+2]
 
 
 def main():
