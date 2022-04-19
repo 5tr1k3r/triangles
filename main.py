@@ -113,16 +113,17 @@ class Triangles(arcade.Window):
             self.is_show_solution = not self.is_show_solution
         elif symbol == arcade.key.R:
             self.line = [self.board.start]
-        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN):
+        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN,
+                        arcade.key.A, arcade.key.W, arcade.key.D, arcade.key.S):
             x, y = self.line[-1]
 
-            if symbol == arcade.key.LEFT:
+            if symbol in (arcade.key.LEFT, arcade.key.A):
                 move = (x, y - 1)
-            elif symbol == arcade.key.UP:
+            elif symbol in (arcade.key.UP, arcade.key.W):
                 move = (x + 1, y)
-            elif symbol == arcade.key.RIGHT:
+            elif symbol in (arcade.key.RIGHT, arcade.key.D):
                 move = (x, y + 1)
-            elif symbol == arcade.key.DOWN:
+            elif symbol in (arcade.key.DOWN, arcade.key.S):
                 move = (x - 1, y)
 
             # noinspection PyUnboundLocalVariable
