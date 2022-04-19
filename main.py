@@ -250,7 +250,7 @@ class Triangles(arcade.Window):
     def draw_hints(self):
         if self.hints and not self.is_show_solution and not self.is_solved:
             arcade.draw_lines([self.glines[x][y] for x, y in self.hints],
-                              arcade.color.GREEN + (100,), line_width=cfg.player_line_width)
+                              cfg.hint_color, line_width=cfg.player_line_width)
 
     @staticmethod
     def draw_help_tip():
@@ -306,7 +306,7 @@ class Triangles(arcade.Window):
 
     def update_popup(self):
         if self.popup:
-            new_alpha = max(0, self.popup_alpha - 2)
+            new_alpha = max(0, self.popup_alpha - cfg.popup_alpha_step)
             self.popup_alpha = new_alpha
             if new_alpha == 0:
                 self.popup = None
