@@ -1,4 +1,5 @@
 import random
+import time
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
 
@@ -59,7 +60,13 @@ class Triangles(arcade.Window):
         self.line: List[Node] = [self.board.start]
         self.is_solved = False
         self.is_validated_line = False
+        self.has_been_solved_already = False
         self.is_help_screen = False
+        self.puzzle_start_time = None
+        self.puzzle_index = 0
+        self.result_alpha = 255
+        self.result_text = None
+        self.was_solution_shown = False
 
         self.start_new_puzzle()
 
@@ -72,6 +79,12 @@ class Triangles(arcade.Window):
         self.line = [self.board.start]
         self.is_solved = False
         self.is_validated_line = False
+        self.has_been_solved_already = False
+
+        self.puzzle_start_time = time.time()
+        self.puzzle_index += 1
+        self.result_alpha = 255
+        self.was_solution_shown = False
 
     def on_draw(self):
         self.clear()
@@ -84,17 +97,26 @@ class Triangles(arcade.Window):
         self.draw_solution()
         self.draw_help_tip()
 
+        if self.has_been_solved_already:
+            self.draw_result()
+
         if self.is_help_screen:
             self.show_help_screen()
 
     def on_update(self, delta_time: float):
         self.check_validation()
+        if self.has_been_solved_already:
+            self.result_alpha = max(0, self.result_alpha - 2)
 
     def check_validation(self):
         if self.line[-1] == self.board.exit:
             if not self.is_validated_line:
                 self.is_solved = self.check_solution()
                 self.is_validated_line = True
+
+                if self.is_solved and not self.has_been_solved_already:
+                    self.show_resulting_time()
+                    self.has_been_solved_already = True
         elif self.is_validated_line:
             self.is_validated_line = False
             self.is_solved = False
@@ -115,6 +137,7 @@ class Triangles(arcade.Window):
         if symbol == arcade.key.ESCAPE:
             arcade.close_window()
         elif symbol == arcade.key.H:
+            self.was_solution_shown = True
             self.is_show_solution = not self.is_show_solution
         elif symbol == arcade.key.R:
             self.line = [self.board.start]
@@ -243,6 +266,20 @@ class Triangles(arcade.Window):
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
                              anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
+
+    def show_resulting_time(self):
+        text = f'Puzzle {self.puzzle_index} solved! Took {(time.time() - self.puzzle_start_time):.1f}s'
+        if self.was_solution_shown:
+            text += ' and solution reveal'
+        print(text)
+        self.result_text = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.result_top_margin,
+                                       anchor_x='center', anchor_y='center',
+                                       font_size=cfg.result_font_size,
+                                       color=arcade.color.WHITE + (self.result_alpha,))
+
+    def draw_result(self):
+        self.result_text.color = self.result_text.color[:3] + (self.result_alpha,)
+        self.result_text.draw()
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
