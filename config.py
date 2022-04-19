@@ -34,8 +34,9 @@ help_title_font_size = cc.get('help_title_font_size', 50)
 help_font_size = cc.get('help_font_size', 20)
 help_border_width = cc.get('help_border_width', 3)
 
-result_top_margin = cc.get('result_top_margin', 60)
-result_font_size = cc.get('result_font_size', 24)
+popup_top_margin = cc.get('popup_top_margin', 60)
+popup_font_size = cc.get('popup_font_size', 24)
+popup_color = arcade.color.WHITE + (255,)
 
 bg_color = arcade.color.SMOKY_BLACK
 board_color = (130, 110, 45)

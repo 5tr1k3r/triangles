@@ -66,8 +66,8 @@ class Triangles(arcade.Window):
         self.is_help_screen = False
         self.puzzle_start_time = None
         self.puzzle_index = 0
-        self.result_alpha = 255
-        self.result_text = None
+        self.popup_alpha = 255
+        self.popup = None
         self.was_solution_shown = False
 
         self.start_new_puzzle()
@@ -87,7 +87,8 @@ class Triangles(arcade.Window):
 
         self.puzzle_start_time = time.time()
         self.puzzle_index += 1
-        self.result_alpha = 255
+        self.popup_alpha = 255
+        self.popup = None
         self.was_solution_shown = False
 
     def on_draw(self):
@@ -101,17 +102,14 @@ class Triangles(arcade.Window):
         self.draw_hints()
         self.draw_solution()
         self.draw_help_tip()
-
-        if self.has_been_solved_already:
-            self.draw_result()
+        self.draw_popup()
 
         if self.is_help_screen:
             self.show_help_screen()
 
     def on_update(self, delta_time: float):
         self.check_validation()
-        if self.has_been_solved_already:
-            self.result_alpha = max(0, self.result_alpha - 2)
+        self.update_popup()
 
     def check_validation(self):
         if self.line[-1] == self.board.exit:
@@ -289,14 +287,25 @@ class Triangles(arcade.Window):
             s = 's' if num > 1 else ''
             text += f' and {num} hint{s}'
         print(text)
-        self.result_text = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.result_top_margin,
-                                       anchor_x='center', anchor_y='center',
-                                       font_size=cfg.result_font_size,
-                                       color=arcade.color.WHITE + (self.result_alpha,))
+        self.set_popup(text)
 
-    def draw_result(self):
-        self.result_text.color = self.result_text.color[:3] + (self.result_alpha,)
-        self.result_text.draw()
+    def set_popup(self, text: str):
+        self.popup = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
+                                 anchor_x='center', anchor_y='center',
+                                 font_size=cfg.popup_font_size,
+                                 color=cfg.popup_color)
+
+    def update_popup(self):
+        if self.popup:
+            new_alpha = max(0, self.popup_alpha - 2)
+            self.popup_alpha = new_alpha
+            if new_alpha == 0:
+                self.popup = None
+
+    def draw_popup(self):
+        if self.popup:
+            self.popup.color = self.popup.color[:3] + (self.popup_alpha,)
+            self.popup.draw()
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
