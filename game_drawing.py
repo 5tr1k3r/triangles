@@ -1,11 +1,10 @@
-import random
 from dataclasses import dataclass
 from typing import Tuple, List, Optional
 
 import arcade
 
 import config as cfg
-from models import Board, Node
+from models import Board, Node, get_triangle_value
 
 Coords = Tuple[float, float]
 
@@ -19,11 +18,6 @@ class TriangleText(arcade.Text):
         self.num = num
         self.cell_x = x
         self.cell_y = y
-
-        self.is_visible = True
-
-        if num == 0 or random.random() < cfg.hide_triangle_probability:
-            self.is_visible = False
 
 
 @dataclass
@@ -125,12 +119,13 @@ class GameDrawing:
 
     def update_triangle_texts(self):
         self.triangle_texts = []
-        for i, (row, grow) in enumerate(zip(self.board.cells, self.gcells)):
-            for j, (cell, gcell) in enumerate(zip(row, grow)):
+        for i, (row, grow) in enumerate(zip(self.board.triangle_values, self.gcells)):
+            for j, (triangle_value, gcell) in enumerate(zip(row, grow)):
                 x, y = gcell
                 x += cfg.cell_size / 2
                 y += cfg.cell_size / 2
-                self.triangle_texts.append(TriangleText(cell, i, j, x, y))
+                if triangle_value >= 1:
+                    self.triangle_texts.append(TriangleText(triangle_value, i, j, x, y))
 
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
@@ -142,8 +137,7 @@ class GameDrawing:
 
     def draw_triangles(self):
         for triangle in self.triangle_texts:
-            if triangle.is_visible:
-                triangle.draw()
+            triangle.draw()
 
     def draw_start(self):
         self.draw_circle_at_position(self.board.start[1], self.board.start[0], cfg.board_color)
@@ -221,3 +215,12 @@ class GameDrawing:
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
                              anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
+
+    def mark_wrong_triangles(self, line: List[Node]):
+        for triangle in self.triangle_texts:
+            if triangle.num != get_triangle_value(triangle.cell_x, triangle.cell_y, line):
+                triangle.color = cfg.wrong_triangle_color
+
+    def reset_triangle_color(self):
+        for triangle in self.triangle_texts:
+            triangle.color = cfg.triangle_color

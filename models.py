@@ -3,7 +3,6 @@ import time
 from typing import Tuple, List, Set
 
 import config as cfg
-# from utils import timeit
 
 Node = Tuple[int, int]
 FullPath = List[Node]
@@ -31,7 +30,7 @@ class Board:
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        self.cells: List[List[int]] = []
+        self.triangle_values: List[List[int]] = []
         self.solution_line: List[Node] = []
         self.start = tuple(cfg.board_start)
         if cfg.board_exit is None:
@@ -60,12 +59,24 @@ class Board:
         self.solution_line = self.pg.pick_random_path()
 
     def find_triangle_values(self):
-        self.cells = []
+        self.triangle_values = []
         for i in range(self.width):
-            self.cells.append([])
+            self.triangle_values.append([])
 
             for j in range(self.height):
-                self.cells[i].append(get_triangle_value(i, j, self.solution_line))
+                triangle_value = get_triangle_value(i, j, self.solution_line)
+                # negative value means we're gonna hide this triangle
+                if random.random() < cfg.hide_triangle_probability:
+                    triangle_value *= -1
+                self.triangle_values[i].append(triangle_value)
+
+    def check_solution(self, line: List[Node]) -> bool:
+        for i, row in enumerate(self.triangle_values):
+            for j, triangle_value in enumerate(row):
+                if triangle_value >= 1 and triangle_value != get_triangle_value(i, j, line):
+                    return False
+
+        return True
 
 
 class PathGenerator:
@@ -78,7 +89,6 @@ class PathGenerator:
         self.obstacles = self.add_obstacles(cfg.obstacles_count)
         self.paths: List[FullPath] = []
 
-    # @timeit
     def run(self):
         total_path_count = 0
         suitable_paths_count = 0
