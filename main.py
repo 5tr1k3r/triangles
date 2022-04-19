@@ -40,7 +40,7 @@ class Triangles(arcade.Window):
     def start_new_puzzle(self):
         self.board.get_solution_line()
         self.board.find_triangle_values()
-        self.gd.update_triangle_texts()
+        self.gd.create_triangle_texts()
 
         self.is_show_solution = False
         self.line = [self.board.start]
@@ -62,9 +62,8 @@ class Triangles(arcade.Window):
         self.gd.draw_triangles()
         self.gd.draw_start()
         self.gd.draw_exit()
-        if len(self.line) > 1:
-            self.gd.draw_line(self.line, self.is_solved)
-        if self.hints and not self.is_show_solution and not self.is_solved:
+        self.gd.draw_line(self.line)
+        if self.is_need_to_show_hints():
             self.gd.draw_hints(self.hints)
         if self.is_show_solution:
             self.gd.draw_solution()
@@ -74,7 +73,16 @@ class Triangles(arcade.Window):
         if self.is_help_screen:
             self.gd.show_help_screen()
 
+    def is_line_present(self) -> bool:
+        return len(self.line) > 1
+
+    def is_need_to_show_hints(self) -> bool:
+        return self.hints and not self.is_show_solution and not self.is_solved
+
     def on_update(self, delta_time: float):
+        self.gd.is_line_present = self.is_line_present()
+        self.gd.is_solved = self.is_solved
+
         self.check_validation()
         self.update_popup()
 

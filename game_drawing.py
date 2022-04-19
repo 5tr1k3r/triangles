@@ -44,6 +44,9 @@ class GameDrawing:
         self.exit_data = self.get_exit_data()
         self.triangle_texts: List[TriangleText] = []
 
+        self.is_line_present = False
+        self.is_solved = False
+
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
         curr_y = self.bottom_left_y + cfg.lane_width
@@ -117,7 +120,7 @@ class GameDrawing:
         # middle of the board
         return
 
-    def update_triangle_texts(self):
+    def create_triangle_texts(self):
         self.triangle_texts = []
         for i, (row, grow) in enumerate(zip(self.board.triangle_values, self.gcells)):
             for j, (triangle_value, gcell) in enumerate(zip(row, grow)):
@@ -140,7 +143,14 @@ class GameDrawing:
             triangle.draw()
 
     def draw_start(self):
-        self.draw_circle_at_position(self.board.start[1], self.board.start[0], cfg.board_color)
+        if self.is_solved:
+            color = cfg.solved_line_color
+        elif self.is_line_present:
+            color = cfg.line_color
+        else:
+            color = cfg.board_color
+
+        self.draw_circle_at_position(self.board.start[1], self.board.start[0], color)
 
     def draw_exit(self):
         if self.exit_data:
@@ -155,7 +165,8 @@ class GameDrawing:
                                       cfg.board_color)
         else:
             # middle of the board
-            self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], cfg.board_color)
+            color = cfg.solved_line_color if self.is_solved else cfg.board_color
+            self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], color)
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
         start_x = self.bottom_left_x + cfg.lane_width / 2
@@ -175,10 +186,11 @@ class GameDrawing:
         arcade.draw_line_strip([self.glines[x][y] for x, y in self.board.solution_line],
                                cfg.solution_color, line_width=cfg.player_line_width)
 
-    def draw_line(self, line: List[Node], is_solved: bool):
-        color = cfg.solved_line_color if is_solved else cfg.line_color
-        arcade.draw_line_strip([self.glines[x][y] for x, y in line],
-                               color, line_width=cfg.player_line_width)
+    def draw_line(self, line: List[Node]):
+        if self.is_line_present:
+            color = cfg.solved_line_color if self.is_solved else cfg.line_color
+            arcade.draw_line_strip([self.glines[x][y] for x, y in line],
+                                   color, line_width=cfg.player_line_width)
 
     def draw_hints(self, hints: List[Node]):
         arcade.draw_lines([self.glines[x][y] for x, y in hints],
