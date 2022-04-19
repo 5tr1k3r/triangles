@@ -69,6 +69,7 @@ class Triangles(arcade.Window):
         self.popup_alpha = 255
         self.popup = None
         self.was_solution_shown = False
+        self.was_given_space_warning = False
 
         self.start_new_puzzle()
 
@@ -87,9 +88,8 @@ class Triangles(arcade.Window):
 
         self.puzzle_start_time = time.time()
         self.puzzle_index += 1
-        self.popup_alpha = 255
-        self.popup = None
         self.was_solution_shown = False
+        self.was_given_space_warning = False
 
     def on_draw(self):
         self.clear()
@@ -163,7 +163,11 @@ class Triangles(arcade.Window):
             elif self.is_valid_move(move):
                 self.line += (move,)
         elif symbol == arcade.key.SPACE:
-            self.start_new_puzzle()
+            if self.has_been_solved_already or self.was_given_space_warning:
+                self.start_new_puzzle()
+            else:
+                self.set_popup('Press Space again to confirm...')
+                self.was_given_space_warning = True
         elif symbol == arcade.key.F1:
             self.is_help_screen = True
         elif symbol == arcade.key.E:
@@ -286,10 +290,11 @@ class Triangles(arcade.Window):
             num = len(self.hints_used)
             s = 's' if num > 1 else ''
             text += f' and {num} hint{s}'
-        print(text)
         self.set_popup(text)
 
     def set_popup(self, text: str):
+        print(text)
+        self.popup_alpha = 255
         self.popup = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
                                  anchor_x='center', anchor_y='center',
                                  font_size=cfg.popup_font_size,
@@ -395,7 +400,7 @@ class Triangles(arcade.Window):
         all_solution_segments = set(range(len(self.board.solution_line) - 1))
         valid_hint_choices = list(all_solution_segments - self.hints_used)
         if not valid_hint_choices:
-            print('ran out of hints :D')
+            self.set_popup('Ran out of hints :D')
             return
 
         chosen_hint = random.choice(valid_hint_choices)
