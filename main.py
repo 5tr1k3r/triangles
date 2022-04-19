@@ -40,7 +40,7 @@ class Triangles(arcade.Window):
     def start_new_puzzle(self):
         self.board.get_solution_line()
         self.board.find_triangle_values()
-        self.gd.triangle_texts = self.gd.get_triangle_texts()
+        self.gd.update_triangle_texts()
 
         self.is_show_solution = False
         self.line = [self.board.start]

@@ -123,16 +123,14 @@ class GameDrawing:
         # middle of the board
         return
 
-    def get_triangle_texts(self) -> List[TriangleText]:
-        result = []
+    def update_triangle_texts(self):
+        self.triangle_texts = []
         for i, (row, grow) in enumerate(zip(self.board.cells, self.gcells)):
             for j, (cell, gcell) in enumerate(zip(row, grow)):
                 x, y = gcell
                 x += cfg.cell_size / 2
                 y += cfg.cell_size / 2
-                result.append(TriangleText(cell, i, j, x, y))
-
-        return result
+                self.triangle_texts.append(TriangleText(cell, i, j, x, y))
 
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
