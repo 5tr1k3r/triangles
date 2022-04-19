@@ -16,6 +16,24 @@ start_radius = cc.get('start_radius', 24)
 player_line_width = cc.get('player_line_width', 10)
 triangle_text_size = cc.get('triangle_text_size', 16)
 
+# margin
+text_left_margin = cc.get('text_left_margin', 20)
+
+# help tip
+help_tip_top_margin = cc.get('help_tip_top_margin', 20)
+help_tip_font_size = cc.get('help_tip_font_size', 16)
+help_tip_color = arcade.color.RED
+
+help_main_margin = cc.get('help_main_margin', 50)
+help_top_margin = cc.get('help_top_margin', 120)
+help_text_margin = cc.get('help_text_margin', 150)
+help_step = cc.get('help_step', 50)
+help_pad = cc.get('help_pad', 14)
+help_font = cc.get('help_font', "Courier New")
+help_title_font_size = cc.get('help_title_font_size', 50)
+help_font_size = cc.get('help_font_size', 20)
+help_border_width = cc.get('help_border_width', 3)
+
 bg_color = arcade.color.SMOKY_BLACK
 board_color = (130, 110, 45)
 cell_color = arcade.color.SMOKY_BLACK
@@ -24,6 +42,9 @@ triangle_color = arcade.color.YELLOW
 wrong_triangle_color = arcade.color.RED
 line_color = (254, 213, 135)
 solved_line_color = (254, 158, 1)
+help_font_color = arcade.color.BLACK
+help_border_color = arcade.color.WHITE
+help_bg_color = arcade.color.ASH_GREY + (230,)
 
 board_width = cc.get('board_width', 4)
 board_height = cc.get('board_height', 4)

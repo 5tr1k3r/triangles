@@ -59,6 +59,7 @@ class Triangles(arcade.Window):
         self.line: List[Node] = [self.board.start]
         self.is_solved = False
         self.is_validated_line = False
+        self.is_help_screen = False
 
         self.start_new_puzzle()
 
@@ -81,6 +82,10 @@ class Triangles(arcade.Window):
         self.draw_exit()
         self.draw_line()
         self.draw_solution()
+        self.draw_help_tip()
+
+        if self.is_help_screen:
+            self.show_help_screen()
 
     def on_update(self, delta_time: float):
         self.check_validation()
@@ -133,6 +138,12 @@ class Triangles(arcade.Window):
                 self.line += (move,)
         elif symbol == arcade.key.SPACE:
             self.start_new_puzzle()
+        elif symbol == arcade.key.F1:
+            self.is_help_screen = True
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.F1:
+            self.is_help_screen = False
 
     def is_reverting(self, move: Node) -> bool:
         return len(self.line) >= 2 and move == self.line[-2]
@@ -201,6 +212,37 @@ class Triangles(arcade.Window):
         color = cfg.solved_line_color if self.is_solved else cfg.line_color
         arcade.draw_line_strip([self.glines[x][y] for x, y in self.line],
                                color, line_width=cfg.player_line_width)
+
+    @staticmethod
+    def draw_help_tip():
+        arcade.draw_text(f'F1 - Help',
+                         cfg.text_left_margin, cfg.window_height - cfg.help_tip_top_margin,
+                         anchor_x='left', anchor_y='top',
+                         font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
+
+    @staticmethod
+    def show_help_screen():
+        levels = [cfg.window_height - cfg.help_top_margin - i * cfg.help_step for i in range(30)]
+
+        arcade.draw_lrtb_rectangle_filled(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
+                                          cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
+                                          color=cfg.help_bg_color)
+        arcade.draw_lrtb_rectangle_outline(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
+                                           cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
+                                           color=cfg.help_border_color, border_width=cfg.help_border_width)
+        arcade.draw_text('HELP', cfg.window_width // 2, levels[0], anchor_x='center',
+                         font_size=cfg.help_title_font_size, color=cfg.help_font_color,
+                         font_name=cfg.help_font, bold=True)
+        for i, line in enumerate((
+                f'{"Esc":<{cfg.help_pad}}quit',
+                f'{"arrows/WASD":<{cfg.help_pad}}move line',
+                f'{"Space":<{cfg.help_pad}}start new puzzle',
+                f'{"R":<{cfg.help_pad}}reset line',
+                f'{"H":<{cfg.help_pad}}show solution',
+                f'{"F1":<{cfg.help_pad}}help',
+        )):
+            arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
+                             anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
