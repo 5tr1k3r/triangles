@@ -246,7 +246,7 @@ class Triangles(arcade.Window):
                                color, line_width=cfg.player_line_width)
 
     def draw_hints(self):
-        if self.hints:
+        if self.hints and not self.is_show_solution and not self.is_solved:
             arcade.draw_lines([self.glines[x][y] for x, y in self.hints],
                               arcade.color.GREEN + (100,), line_width=cfg.player_line_width)
 
