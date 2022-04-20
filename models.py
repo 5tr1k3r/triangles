@@ -1,5 +1,6 @@
 import random
 import time
+from dataclasses import dataclass
 from typing import Tuple, List, Set
 
 import config as cfg
@@ -48,6 +49,7 @@ class Board:
             raise RuntimeError('exit is not within the board dimensions')
 
         self.pg = None
+        self.difficulty: int = 0
 
     def generate_paths(self):
         self.pg = PathGenerator(self.width, self.height, self.start, self.exit)
@@ -77,6 +79,42 @@ class Board:
                     return False
 
         return True
+
+    def estimate_difficulty(self):
+        if self.width < 2 or self.height < 2:
+            self.difficulty = 0
+            return
+
+        score = 0
+        triangles_count = len([x for row in self.triangle_values for x in row if x >= 1])
+        concentration = triangles_count / (self.width * self.height)
+
+        # divide the entire board in 2x2 blocks
+        for i in range(self.width - 1):
+            for j in range(self.height - 1):
+                # too lazy to use numpy
+                unfiltered_block = (self.triangle_values[i][j:j + 2] +
+                                    self.triangle_values[i + 1][j:j + 2])
+                block = [x for x in unfiltered_block if x >= 1]
+
+                # 0 triangles - 1 score
+                # 1 triangle  - 2 score
+                # 2 triangles - 4 score
+                # 3 triangles - 8 score
+                # 4 triangles - 16 score
+                score += 2 ** len(block)
+
+        self.difficulty = score * self.get_concentration_difficulty_multiplier(concentration)
+
+    @staticmethod
+    def get_concentration_difficulty_multiplier(conc: float) -> float:
+        # anything below or above the magic number will get lower multiplier
+        magic_conc_number = 0.75
+        if conc > magic_conc_number:
+            delta = conc - magic_conc_number
+            conc = magic_conc_number - delta
+
+        return conc / magic_conc_number
 
 
 class PathGenerator:
@@ -173,6 +211,12 @@ class PathGenerator:
 
     def pick_random_path(self):
         return random.choice(self.paths)
+
+
+@dataclass
+class PuzzleStats:
+    time_spent: float
+    difficulty: float
 
 
 def test_obstacles():

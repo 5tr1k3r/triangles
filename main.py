@@ -6,7 +6,7 @@ import arcade
 
 import config as cfg
 from game_drawing import GameDrawing
-from models import Board, Node
+from models import Board, Node, PuzzleStats
 
 
 class Triangles(arcade.Window):
@@ -33,13 +33,14 @@ class Triangles(arcade.Window):
         self.popup = None
         self.was_solution_shown = False
         self.was_given_space_warning = False
-        self.puzzle_times: List[float] = []
+        self.puzzle_stats: List[PuzzleStats] = []
 
         self.start_new_puzzle()
 
     def start_new_puzzle(self):
         self.board.get_solution_line()
         self.board.find_triangle_values()
+        self.board.estimate_difficulty()
         self.gd.create_triangle_texts()
 
         self.is_show_solution = False
@@ -68,6 +69,7 @@ class Triangles(arcade.Window):
         if self.is_show_solution:
             self.gd.draw_solution()
         self.gd.draw_help_tip()
+        self.gd.draw_board_difficulty()
         self.draw_popup()
 
         if self.is_help_screen:
@@ -160,7 +162,7 @@ class Triangles(arcade.Window):
 
     def show_resulting_time(self):
         result_time = time.time() - self.puzzle_start_time
-        self.puzzle_times.append(result_time)
+        self.puzzle_stats.append(PuzzleStats(result_time, self.board.difficulty))
         text = f'Puzzle {self.puzzle_index} solved! Took {result_time:.1f}s'
         if self.was_solution_shown:
             text += ' and solution reveal'
@@ -202,10 +204,13 @@ class Triangles(arcade.Window):
         self.hints += self.board.solution_line[chosen_hint:chosen_hint + 2]
 
     def display_final_stats(self):
-        puzzles_solved = len(self.puzzle_times)
+        puzzles_solved = len(self.puzzle_stats)
         if puzzles_solved:
-            print(f'Solved {puzzles_solved} puzzles total, '
-                  f'avg solving time {(sum(self.puzzle_times) / puzzles_solved):.1f}s')
+            print(f'Solved {puzzles_solved} {self.board.width}x{self.board.height} puzzles total, '
+                  f'avg time spent '
+                  f'{(sum(x.time_spent for x in self.puzzle_stats) / puzzles_solved):.1f}s, '
+                  f'avg puzzle difficulty '
+                  f'{(sum(x.difficulty for x in self.puzzle_stats) / puzzles_solved):.1f}')
 
 
 def main():

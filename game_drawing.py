@@ -203,6 +203,13 @@ class GameDrawing:
                          anchor_x='left', anchor_y='top',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
+    def draw_board_difficulty(self):
+        arcade.draw_text(f'Difficulty: {round(self.board.difficulty)}',
+                         cfg.window_width - cfg.text_left_margin,
+                         cfg.window_height - cfg.help_tip_top_margin,
+                         anchor_x='right', anchor_y='top',
+                         font_size=cfg.help_tip_font_size, color=arcade.color.GOLD)
+
     @staticmethod
     def show_help_screen():
         levels = [cfg.window_height - cfg.help_top_margin - i * cfg.help_step for i in range(30)]
