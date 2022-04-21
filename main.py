@@ -14,7 +14,6 @@ class Triangles(arcade.Window):
     def __init__(self):
         super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
 
-        arcade.set_background_color(cfg.bg_color)
         self.board = Board(width=cfg.board_width,
                            height=cfg.board_height,
                            bstart=cfg.board_start,
@@ -44,6 +43,8 @@ class Triangles(arcade.Window):
         self.was_solution_shown = False
         self.was_given_space_warning = False
         self.puzzle_stats: List[PuzzleStats] = []
+
+        arcade.set_background_color(cfg.bg_color[cfg.theme])
 
         self.start_new_puzzle()
 
@@ -163,6 +164,10 @@ class Triangles(arcade.Window):
             code = self.board.generate_code()
             pyperclip.copy(code)
             self.set_popup('Puzzle code copied')
+        elif symbol == arcade.key.T:
+            cfg.theme = int(not cfg.theme)
+            arcade.set_background_color(cfg.bg_color[cfg.theme])
+            self.gd.update_triangle_colors()
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.F1:
@@ -199,7 +204,7 @@ class Triangles(arcade.Window):
         self.popup = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
                                  anchor_x='center', anchor_y='center',
                                  font_size=cfg.popup_font_size,
-                                 color=cfg.popup_color)
+                                 color=cfg.popup_color[cfg.theme])
 
     def update_popup(self):
         if self.popup:

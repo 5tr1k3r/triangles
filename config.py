@@ -36,7 +36,7 @@ help_border_width = cc.get('help_border_width', 3)
 
 popup_top_margin = cc.get('popup_top_margin', 70)
 popup_font_size = cc.get('popup_font_size', 24)
-popup_color = arcade.color.WHITE + (255,)
+popup_color = [arcade.color.WHITE + (255,), arcade.color.BLACK + (255,)]
 
 # how fast the popup will turn transparent
 # default is 2, which means a popup will live for
@@ -44,13 +44,15 @@ popup_color = arcade.color.WHITE + (255,)
 # 255 / 2 / 60 fps = ~2.1s
 popup_alpha_step = cc.get('popup_alpha_step', 2)
 
-bg_color = arcade.color.SMOKY_BLACK
-board_color = (130, 110, 45)
-cell_color = arcade.color.SMOKY_BLACK
+theme = cc.get('theme', 0)
+
+bg_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
+board_color = [(130, 110, 45), (138, 131, 132)]
+cell_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
 solution_color = arcade.color.RED + (170,)
-triangle_color = arcade.color.YELLOW
+triangle_color = [arcade.color.YELLOW, arcade.color.BLACK]
 wrong_triangle_color = arcade.color.RED
-line_color = (254, 213, 135)
+line_color = [(254, 213, 135), (228, 191, 167)]
 solved_line_color = (254, 158, 1)
 help_font_color = arcade.color.BLACK
 help_border_color = arcade.color.WHITE

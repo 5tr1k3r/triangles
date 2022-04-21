@@ -12,7 +12,7 @@ Coords = Tuple[float, float]
 class TriangleText(arcade.Text):
     def __init__(self, num: int, x: int, y: int,
                  start_x: float, start_y: float):
-        super().__init__(f'{num}', start_x, start_y, cfg.triangle_color,
+        super().__init__(f'{num}', start_x, start_y, cfg.triangle_color[cfg.theme],
                          font_size=cfg.triangle_text_size, anchor_x='center', anchor_y='center')
 
         self.num = num
@@ -133,10 +133,10 @@ class GameDrawing:
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
                                           self.gboard_width, self.gboard_height,
-                                          cfg.board_color)
+                                          cfg.board_color[cfg.theme])
         for row in self.gcells:
             for x, y in row:
-                arcade.draw_xywh_rectangle_filled(x, y, cfg.cell_size, cfg.cell_size, cfg.cell_color)
+                arcade.draw_xywh_rectangle_filled(x, y, cfg.cell_size, cfg.cell_size, cfg.cell_color[cfg.theme])
 
     def draw_triangles(self):
         for triangle in self.triangle_texts:
@@ -146,9 +146,9 @@ class GameDrawing:
         if self.is_solved:
             color = cfg.solved_line_color
         elif self.is_line_present:
-            color = cfg.line_color
+            color = cfg.line_color[cfg.theme]
         else:
-            color = cfg.board_color
+            color = cfg.board_color[cfg.theme]
 
         self.draw_circle_at_position(self.board.start[1], self.board.start[0], color)
 
@@ -158,14 +158,14 @@ class GameDrawing:
                                               self.exit_data.rect_y,
                                               self.exit_data.rect_w,
                                               self.exit_data.rect_h,
-                                              cfg.board_color)
+                                              cfg.board_color[cfg.theme])
             arcade.draw_circle_filled(self.exit_data.circle_x,
                                       self.exit_data.circle_y,
                                       self.exit_data.circle_radius,
-                                      cfg.board_color)
+                                      cfg.board_color[cfg.theme])
         else:
             # middle of the board
-            color = cfg.solved_line_color if self.is_solved else cfg.board_color
+            color = cfg.solved_line_color if self.is_solved else cfg.board_color[cfg.theme]
             self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], color)
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
@@ -188,7 +188,7 @@ class GameDrawing:
 
     def draw_line(self, line: List[Node]):
         if self.is_line_present:
-            color = cfg.solved_line_color if self.is_solved else cfg.line_color
+            color = cfg.solved_line_color if self.is_solved else cfg.line_color[cfg.theme]
             arcade.draw_line_strip([self.glines[x][y] for x, y in line],
                                    color, line_width=cfg.player_line_width)
 
@@ -243,7 +243,7 @@ class GameDrawing:
 
     def reset_triangle_color(self):
         for triangle in self.triangle_texts:
-            triangle.color = cfg.triangle_color
+            triangle.color = cfg.triangle_color[cfg.theme]
 
     @staticmethod
     def draw_custom_puzzle_text():
@@ -252,3 +252,7 @@ class GameDrawing:
                          cfg.help_tip_top_margin,
                          anchor_x='right', anchor_y='baseline',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
+
+    def update_triangle_colors(self):
+        for triangle in self.triangle_texts:
+            triangle.color = cfg.triangle_color[cfg.theme]
