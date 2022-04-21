@@ -65,10 +65,10 @@ class Board:
 
     def find_triangle_values(self):
         self.triangle_values = []
-        for i in range(self.width):
+        for i in range(self.height):
             self.triangle_values.append([])
 
-            for j in range(self.height):
+            for j in range(self.width):
                 triangle_value = get_triangle_value(i, j, self.solution_line)
                 # negative value means we're gonna hide this triangle
                 if random.random() < cfg.hide_triangle_probability:
@@ -93,8 +93,8 @@ class Board:
         concentration = triangles_count / (self.width * self.height)
 
         # divide the entire board in 2x2 blocks
-        for i in range(self.width - 1):
-            for j in range(self.height - 1):
+        for i in range(self.height - 1):
+            for j in range(self.width - 1):
                 # too lazy to use numpy
                 unfiltered_block = (self.triangle_values[i][j:j + 2] +
                                     self.triangle_values[i + 1][j:j + 2])
