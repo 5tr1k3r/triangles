@@ -1,5 +1,7 @@
+import base64
 import random
 import time
+import zlib
 from dataclasses import dataclass
 from typing import Tuple, List, Set
 
@@ -28,16 +30,15 @@ def get_triangle_value(i: int, j: int, line: FullPath) -> int:
 
 
 class Board:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, bstart, bexit):
         self.width = width
         self.height = height
-        self.triangle_values: List[List[int]] = []
-        self.solution_line: List[Node] = []
-        self.start = tuple(cfg.board_start)
-        if cfg.board_exit is None:
+
+        self.start = tuple(bstart)
+        if bexit is None:
             self.exit = (height, width)
         else:
-            self.exit = tuple(cfg.board_exit)
+            self.exit = tuple(bexit)
 
         if self.start == self.exit:
             raise RuntimeError('start and exit should be different')
@@ -48,6 +49,8 @@ class Board:
         if not (0 <= self.exit[0] <= self.height and 0 <= self.exit[1] <= self.width):
             raise RuntimeError('exit is not within the board dimensions')
 
+        self.triangle_values: List[List[int]] = []
+        self.solution_line: List[Node] = []
         self.pg = None
         self.difficulty: int = 0
 
@@ -115,6 +118,36 @@ class Board:
             conc = magic_conc_number - delta
 
         return conc / magic_conc_number
+
+    def generate_code(self) -> str:
+        result = bytes()
+
+        result += bytes([self.width])
+        result += bytes([self.height])
+        result += bytes(self.start)
+        result += bytes(self.exit)
+        result += bytes([t + 3 for row in self.triangle_values for t in row])
+        result += bytes([x for pair in self.solution_line for x in pair])
+
+        result = base64.b64encode(zlib.compress(result))
+
+        return result.decode()
+
+    def load_custom_puzzle(self, code: str):
+        code = code.encode()
+        code = zlib.decompress(base64.b64decode(code))
+
+        w, h, start_x, start_y, exit_x, exit_y = [int(x) for x in code[:6]]
+        triangles_end_spot = 6 + w * h
+        t = [int(x) - 3 for x in code[6:triangles_end_spot]]
+        s = [int(x) for x in code[triangles_end_spot:]]
+
+        self.width = w
+        self.height = h
+        self.start = (start_x, start_y)
+        self.exit = (exit_x, exit_y)
+        self.triangle_values = [t[i:i + w] for i in range(0, len(t), w)]
+        self.solution_line = [tuple(s[i:i + 2]) for i in range(0, len(s), 2)]
 
 
 class PathGenerator:

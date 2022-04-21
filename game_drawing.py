@@ -230,6 +230,7 @@ class GameDrawing:
                 f'{"R":<{cfg.help_pad}}reset line',
                 f'{"E":<{cfg.help_pad}}get a hint',
                 f'{"H":<{cfg.help_pad}}show solution',
+                f'{"Enter":<{cfg.help_pad}}copy puzzle code',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
@@ -243,3 +244,11 @@ class GameDrawing:
     def reset_triangle_color(self):
         for triangle in self.triangle_texts:
             triangle.color = cfg.triangle_color
+
+    @staticmethod
+    def draw_custom_puzzle_text():
+        arcade.draw_text(f'CUSTOM PUZZLE MODE',
+                         cfg.window_width - cfg.text_left_margin,
+                         cfg.help_tip_top_margin,
+                         anchor_x='right', anchor_y='baseline',
+                         font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)

@@ -3,6 +3,7 @@ import time
 from typing import List, Set
 
 import arcade
+import pyperclip
 
 import config as cfg
 from game_drawing import GameDrawing
@@ -14,8 +15,17 @@ class Triangles(arcade.Window):
         super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
 
         arcade.set_background_color(cfg.bg_color)
-        self.board = Board(width=cfg.board_width, height=cfg.board_height)
-        self.board.generate_paths()
+        self.board = Board(width=cfg.board_width,
+                           height=cfg.board_height,
+                           bstart=cfg.board_start,
+                           bexit=cfg.board_exit)
+
+        if cfg.custom_puzzle_code is not None:
+            self.is_custom_puzzle = True
+            self.board.load_custom_puzzle(cfg.custom_puzzle_code)
+        else:
+            self.is_custom_puzzle = False
+            self.board.generate_paths()
 
         self.gd = GameDrawing(self.board)
 
@@ -38,8 +48,9 @@ class Triangles(arcade.Window):
         self.start_new_puzzle()
 
     def start_new_puzzle(self):
-        self.board.get_solution_line()
-        self.board.find_triangle_values()
+        if not self.is_custom_puzzle:
+            self.board.get_solution_line()
+            self.board.find_triangle_values()
         self.board.estimate_difficulty()
         self.gd.create_triangle_texts()
 
@@ -70,6 +81,8 @@ class Triangles(arcade.Window):
             self.gd.draw_solution()
         self.gd.draw_help_tip()
         self.gd.draw_board_difficulty()
+        if self.is_custom_puzzle:
+            self.gd.draw_custom_puzzle_text()
         self.draw_popup()
 
         if self.is_help_screen:
@@ -133,6 +146,10 @@ class Triangles(arcade.Window):
             elif self.is_valid_move(move):
                 self.line += (move,)
         elif symbol == arcade.key.SPACE:
+            if self.is_custom_puzzle:
+                self.set_popup('Not available in custom puzzle mode')
+                return
+
             if self.has_been_solved_already or self.was_given_space_warning:
                 self.start_new_puzzle()
             else:
@@ -142,6 +159,10 @@ class Triangles(arcade.Window):
             self.is_help_screen = True
         elif symbol == arcade.key.E:
             self.get_hint()
+        elif symbol == arcade.key.ENTER:
+            code = self.board.generate_code()
+            pyperclip.copy(code)
+            self.set_popup('Puzzle code copied')
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.F1:
