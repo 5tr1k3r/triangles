@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from typing import Tuple, List, Optional
 
@@ -9,15 +10,72 @@ from models import Board, Node, get_triangle_value
 Coords = Tuple[float, float]
 
 
-class TriangleText(arcade.Text):
+@dataclass
+class TriangleCoords:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+    middle_x: float
+    middle_y: float
+
+    def shift_horizontally(self, val: float):
+        x1 = self.x1 + val
+        x2 = self.x2 + val
+        x3 = self.x3 + val
+        middle_x = self.middle_x + val
+
+        return TriangleCoords(x1, self.y1, x2, self.y2, x3, self.y3, middle_x, self.middle_y)
+
+
+class Triangle:
     def __init__(self, num: int, x: int, y: int,
                  start_x: float, start_y: float):
-        super().__init__(f'{num}', start_x, start_y, cfg.triangle_color[cfg.theme],
-                         font_size=cfg.triangle_text_size, anchor_x='center', anchor_y='center')
+        self.text = arcade.Text(f'{num}', start_x, start_y, cfg.triangle_color[cfg.theme],
+                                font_size=cfg.triangle_text_size,
+                                anchor_x='center', anchor_y='center')
 
         self.num = num
         self.cell_x = x
         self.cell_y = y
+        self.color = cfg.triangle_color[0]
+
+        self.triangle_coords: List[TriangleCoords] = []
+        self.find_triangle_coords(start_x, start_y)
+
+    def find_triangle_coords(self, x: float, y: float):
+        margin = 4
+        bottom_offset = cfg.triangle_size * math.sqrt(3) / 6
+        top_offset = cfg.triangle_size * math.sqrt(3) / 3
+        double_triangle_offset = (cfg.triangle_size + margin) / 2
+
+        # left
+        x1 = x - cfg.triangle_size / 2
+        y1 = y - bottom_offset
+        # top
+        x2 = x
+        y2 = y + top_offset
+        # right
+        x3 = x1 + cfg.triangle_size
+        y3 = y1
+
+        coords_a = TriangleCoords(x1, y1, x2, y2, x3, y3, x, y)
+        if self.num == 1:
+            self.triangle_coords.append(coords_a)
+            return
+
+        coords_b = coords_a.shift_horizontally(cfg.triangle_size + margin)
+        coords_c = coords_a.shift_horizontally(-(cfg.triangle_size + margin))
+
+        if self.num == 3:
+            self.triangle_coords += [coords_a, coords_b, coords_c]
+            return
+
+        coords_a = coords_a.shift_horizontally(-double_triangle_offset)
+        coords_b = coords_b.shift_horizontally(-double_triangle_offset)
+        self.triangle_coords += [coords_a, coords_b]
 
 
 @dataclass
@@ -42,7 +100,7 @@ class GameDrawing:
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
         self.exit_data = self.get_exit_data()
-        self.triangle_texts: List[TriangleText] = []
+        self.triangles: List[Triangle] = []
 
         self.is_line_present = False
         self.is_solved = False
@@ -121,14 +179,14 @@ class GameDrawing:
         return
 
     def create_triangle_texts(self):
-        self.triangle_texts = []
+        self.triangles = []
         for i, (row, grow) in enumerate(zip(self.board.triangle_values, self.gcells)):
             for j, (triangle_value, gcell) in enumerate(zip(row, grow)):
                 x, y = gcell
                 x += cfg.cell_size / 2
                 y += cfg.cell_size / 2
                 if triangle_value >= 1:
-                    self.triangle_texts.append(TriangleText(triangle_value, i, j, x, y))
+                    self.triangles.append(Triangle(triangle_value, i, j, x, y))
 
     def draw_board(self):
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
@@ -139,8 +197,12 @@ class GameDrawing:
                 arcade.draw_xywh_rectangle_filled(x, y, cfg.cell_size, cfg.cell_size, cfg.cell_color[cfg.theme])
 
     def draw_triangles(self):
-        for triangle in self.triangle_texts:
-            triangle.draw()
+        for triangle in self.triangles:
+            if cfg.numbers_instead_of_triangles:
+                triangle.text.draw()
+            else:
+                for t in triangle.triangle_coords:
+                    arcade.draw_triangle_filled(t.x1, t.y1, t.x2, t.y2, t.x3, t.y3, triangle.color)
 
     def draw_start(self):
         if self.is_solved:
@@ -232,19 +294,22 @@ class GameDrawing:
                 f'{"H":<{cfg.help_pad}}show solution',
                 f'{"Enter":<{cfg.help_pad}}copy puzzle code',
                 f'{"T":<{cfg.help_pad}}change theme',
+                f'{"N":<{cfg.help_pad}}numbers/triangles',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
                              anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
 
     def mark_wrong_triangles(self, line: List[Node]):
-        for triangle in self.triangle_texts:
+        for triangle in self.triangles:
             if triangle.num != get_triangle_value(triangle.cell_x, triangle.cell_y, line):
+                triangle.text.color = cfg.wrong_triangle_color
                 triangle.color = cfg.wrong_triangle_color
 
     def reset_triangle_color(self):
-        for triangle in self.triangle_texts:
-            triangle.color = cfg.triangle_color[cfg.theme]
+        for triangle in self.triangles:
+            triangle.text.color = cfg.triangle_color[cfg.theme]
+            triangle.color = cfg.triangle_color[0]
 
     @staticmethod
     def draw_custom_puzzle_text():
@@ -255,5 +320,6 @@ class GameDrawing:
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
     def update_triangle_colors(self):
-        for triangle in self.triangle_texts:
-            triangle.color = cfg.triangle_color[cfg.theme]
+        for triangle in self.triangles:
+            triangle.text.color = cfg.triangle_color[cfg.theme]
+            triangle.color = cfg.triangle_color[0]
