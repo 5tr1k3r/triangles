@@ -170,6 +170,8 @@ class Triangles(arcade.Window):
             self.gd.update_triangle_colors()
         elif symbol == arcade.key.N:
             cfg.numbers_instead_of_triangles = not cfg.numbers_instead_of_triangles
+        elif symbol == arcade.key.Z:
+            self.undo()
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.F1:
@@ -177,6 +179,10 @@ class Triangles(arcade.Window):
 
     def is_reverting(self, move: Node) -> bool:
         return len(self.line) >= 2 and move == self.line[-2]
+
+    def undo(self):
+        if len(self.line) >= 2:
+            self.line = self.line[:-1]
 
     def is_valid_move(self, move: Node) -> bool:
         x, y = move

@@ -295,6 +295,7 @@ class GameDrawing:
                 f'{"Enter":<{cfg.help_pad}}copy puzzle code',
                 f'{"T":<{cfg.help_pad}}change theme',
                 f'{"N":<{cfg.help_pad}}numbers/triangles',
+                f'{"Z":<{cfg.help_pad}}undo',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
