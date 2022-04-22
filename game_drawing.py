@@ -231,6 +231,7 @@ class GameDrawing:
                 f'{"E":<{cfg.help_pad}}get a hint',
                 f'{"H":<{cfg.help_pad}}show solution',
                 f'{"Enter":<{cfg.help_pad}}copy puzzle code',
+                f'{"T":<{cfg.help_pad}}change theme',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
             arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
