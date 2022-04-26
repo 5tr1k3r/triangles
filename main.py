@@ -72,6 +72,7 @@ class Triangles(arcade.Window):
         self.clear()
 
         self.gd.draw_board()
+        self.gd.draw_light_layer()
         self.gd.draw_triangles()
         self.gd.draw_start()
         self.gd.draw_exit()
@@ -167,6 +168,7 @@ class Triangles(arcade.Window):
         elif symbol == arcade.key.T:
             cfg.theme = int(not cfg.theme)
             arcade.set_background_color(cfg.bg_color[cfg.theme])
+            self.gd.light_layer.set_background_color(cfg.bg_color[cfg.theme])
             self.gd.update_triangle_colors()
             self.gd.reload_cell_textures()
             self.gd.gboard.reload_texture()

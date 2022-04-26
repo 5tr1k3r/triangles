@@ -4,6 +4,7 @@ from typing import Tuple, List, Optional
 
 import arcade
 from PIL import Image, ImageDraw
+from arcade.experimental.lights import Light, LightLayer
 
 import config as cfg
 from models import Board, Node, get_triangle_value
@@ -93,8 +94,9 @@ class GExitData:
 class Cell(arcade.Sprite):
     textures = []
     for cell_color in cfg.cell_color:
+        cell_color = cell_color + (cfg.cell_alpha,)
         img = Image.new("RGBA", (cfg.cell_size, cfg.cell_size), cell_color)
-        textures.append(arcade.Texture(name=str(cell_color), image=img))
+        textures.append(arcade.Texture(name=str(cell_color), image=img, hit_box_algorithm=None))
 
     def __init__(self, left: float, bottom: float):
         super().__init__(texture=Cell.textures[cfg.theme])
@@ -143,6 +145,9 @@ class GameDrawing:
 
         self.is_line_present = False
         self.is_solved = False
+
+        self.light_layer = LightLayer(cfg.window_width, cfg.window_height)
+        self.light_layer.set_background_color(cfg.bg_color[cfg.theme])
 
     def get_cell_coords(self) -> List[List[Coords]]:
         coords = []
@@ -219,17 +224,27 @@ class GameDrawing:
 
     def create_triangle_texts(self):
         self.triangles = []
+        self.light_layer._lights = []
         for i, (row, grow) in enumerate(zip(self.board.triangle_values, self.gcells)):
             for j, (triangle_value, gcell) in enumerate(zip(row, grow)):
                 x, y = gcell
                 x += cfg.cell_size / 2
                 y += cfg.cell_size / 2
                 if triangle_value >= 1:
-                    self.triangles.append(Triangle(triangle_value, i, j, x, y))
+                    triangle = Triangle(triangle_value, i, j, x, y)
+                    self.triangles.append(triangle)
+                    for t in triangle.triangle_coords:
+                        self.light_layer.add(Light(t.middle_x, t.middle_y,
+                                                   cfg.triangle_size * 1.4,
+                                                   cfg.triangle_color[0], 'soft'))
 
     def draw_board(self):
-        self.gboard_list.draw()
-        self.cells.draw()
+        with self.light_layer:
+            self.gboard_list.draw()
+            self.cells.draw()
+
+    def draw_light_layer(self):
+        self.light_layer.draw(ambient_color=arcade.color.WHITE)
 
     def draw_triangles(self):
         for triangle in self.triangles:

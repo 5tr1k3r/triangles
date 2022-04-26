@@ -51,6 +51,7 @@ theme = cc.get('theme', 0)
 bg_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
 board_color = [(130, 110, 45), (138, 131, 132)]
 cell_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
+cell_alpha = 150
 solution_color = arcade.color.RED + (170,)
 triangle_color = [(255, 187, 0), arcade.color.BLACK]
 wrong_triangle_color = arcade.color.RED
