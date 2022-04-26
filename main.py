@@ -168,6 +168,7 @@ class Triangles(arcade.Window):
             cfg.theme = int(not cfg.theme)
             arcade.set_background_color(cfg.bg_color[cfg.theme])
             self.gd.update_triangle_colors()
+            self.gd.reload_cell_textures()
         elif symbol == arcade.key.N:
             cfg.numbers_instead_of_triangles = not cfg.numbers_instead_of_triangles
         elif symbol == arcade.key.Z:

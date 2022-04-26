@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple, List, Optional
 
 import arcade
+from PIL import Image
 
 import config as cfg
 from models import Board, Node, get_triangle_value
@@ -89,6 +90,21 @@ class GExitData:
     circle_radius: float
 
 
+class Cell(arcade.Sprite):
+    textures = []
+    for cell_color in cfg.cell_color:
+        img = Image.new("RGBA", (cfg.cell_size, cfg.cell_size), cell_color)
+        textures.append(arcade.texture.Texture(name=str(cell_color), image=img))
+
+    def __init__(self, left: float, bottom: float):
+        super().__init__(texture=self.textures[cfg.theme])
+        self.left = left
+        self.bottom = bottom
+
+    def reload_texture(self):
+        self.texture = Cell.textures[cfg.theme]
+
+
 class GameDrawing:
     def __init__(self, board: Board):
         self.board = board
@@ -101,6 +117,9 @@ class GameDrawing:
         self.glines = self.get_lines_coords()
         self.exit_data = self.get_exit_data()
         self.triangles: List[Triangle] = []
+
+        self.cells = arcade.SpriteList()
+        self.create_cell_sprites()
 
         self.is_line_present = False
         self.is_solved = False
@@ -192,9 +211,7 @@ class GameDrawing:
         arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
                                           self.gboard_width, self.gboard_height,
                                           cfg.board_color[cfg.theme])
-        for row in self.gcells:
-            for x, y in row:
-                arcade.draw_xywh_rectangle_filled(x, y, cfg.cell_size, cfg.cell_size, cfg.cell_color[cfg.theme])
+        self.cells.draw()
 
     def draw_triangles(self):
         for triangle in self.triangles:
@@ -324,3 +341,14 @@ class GameDrawing:
         for triangle in self.triangles:
             triangle.text.color = cfg.triangle_color[cfg.theme]
             triangle.color = cfg.triangle_color[0]
+
+    def create_cell_sprites(self):
+        for row in self.gcells:
+            for x, y in row:
+                cell = Cell(x, y)
+                self.cells.append(cell)
+
+    def reload_cell_textures(self):
+        for cell in self.cells:
+            # noinspection PyUnresolvedReferences
+            cell.reload_texture()
