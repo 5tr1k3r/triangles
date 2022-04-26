@@ -1,11 +1,10 @@
-import base64
 import random
 import time
-import zlib
 from dataclasses import dataclass
 from typing import Tuple, List, Set
 
 import config as cfg
+from encoding import ponchik_encode, ponchik_decode
 
 Node = Tuple[int, int]
 FullPath = List[Node]
@@ -120,34 +119,23 @@ class Board:
         return conc / magic_conc_number
 
     def generate_code(self) -> str:
-        result = bytes()
-
-        result += bytes([self.width])
-        result += bytes([self.height])
-        result += bytes(self.start)
-        result += bytes(self.exit)
-        result += bytes([t + 3 for row in self.triangle_values for t in row])
-        result += bytes([x for pair in self.solution_line for x in pair])
-
-        result = base64.b64encode(zlib.compress(result))
+        triangle_values = [t for row in self.triangle_values for t in row]
+        result = ponchik_encode(self.width, self.height, self.start, self.exit,
+                                triangle_values, self.solution_line)
 
         return result.decode()
 
     def load_custom_puzzle(self, code: str):
         code = code.encode()
-        code = zlib.decompress(base64.b64decode(code))
-
-        w, h, start_x, start_y, exit_x, exit_y = [int(x) for x in code[:6]]
-        triangles_end_spot = 6 + w * h
-        t = [int(x) - 3 for x in code[6:triangles_end_spot]]
-        s = [int(x) for x in code[triangles_end_spot:]]
+        code = ponchik_decode(code)
+        w, h, start, exit_, t, solution = code
 
         self.width = w
         self.height = h
-        self.start = (start_x, start_y)
-        self.exit = (exit_x, exit_y)
+        self.start = start
+        self.exit = exit_
         self.triangle_values = [t[i:i + w] for i in range(0, len(t), w)]
-        self.solution_line = [tuple(s[i:i + 2]) for i in range(0, len(s), 2)]
+        self.solution_line = solution
 
 
 class PathGenerator:
