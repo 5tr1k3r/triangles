@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple, List, Optional
 
 import arcade
-from PIL import Image
+from PIL import Image, ImageDraw
 
 import config as cfg
 from models import Board, Node, get_triangle_value
@@ -94,15 +94,32 @@ class Cell(arcade.Sprite):
     textures = []
     for cell_color in cfg.cell_color:
         img = Image.new("RGBA", (cfg.cell_size, cfg.cell_size), cell_color)
-        textures.append(arcade.texture.Texture(name=str(cell_color), image=img))
+        textures.append(arcade.Texture(name=str(cell_color), image=img))
 
     def __init__(self, left: float, bottom: float):
-        super().__init__(texture=self.textures[cfg.theme])
+        super().__init__(texture=Cell.textures[cfg.theme])
         self.left = left
         self.bottom = bottom
 
     def reload_texture(self):
         self.texture = Cell.textures[cfg.theme]
+
+
+class GBoard(arcade.Sprite):
+    def __init__(self, width: int, height: int, left: float, bottom: float):
+        self.gboard_textures = []
+        for cell_color in cfg.board_color:
+            texture = arcade.Texture.create_empty(f'gboard {cell_color}', (width, height))
+            draw = ImageDraw.Draw(texture.image)
+            draw.rounded_rectangle([0, 0, width - 1, height - 1], cfg.lane_width // 2, cell_color)
+            self.gboard_textures.append(texture)
+
+        super().__init__(texture=self.gboard_textures[cfg.theme])
+        self.left = left
+        self.bottom = bottom
+
+    def reload_texture(self):
+        self.texture = self.gboard_textures[cfg.theme]
 
 
 class GameDrawing:
@@ -120,6 +137,9 @@ class GameDrawing:
 
         self.cells = arcade.SpriteList()
         self.create_cell_sprites()
+        self.gboard = GBoard(self.gboard_width, self.gboard_height, self.bottom_left_x, self.bottom_left_y)
+        self.gboard_list = arcade.SpriteList()
+        self.gboard_list.append(self.gboard)
 
         self.is_line_present = False
         self.is_solved = False
@@ -166,14 +186,14 @@ class GameDrawing:
             circle_x = rect_x + dim_b
 
             if x == self.board.height:
-                rect_y = self.bottom_left_y + self.gboard_height
-                circle_y = rect_y + dim_a
+                rect_y = self.bottom_left_y + self.gboard_height - dim_b
+                circle_y = rect_y + dim_a + dim_b
             else:
                 rect_y = self.bottom_left_y - dim_a
                 circle_y = rect_y
 
             return GExitData(rect_x=rect_x + offset_x, rect_y=rect_y,
-                             rect_w=cfg.lane_width, rect_h=dim_a,
+                             rect_w=cfg.lane_width, rect_h=dim_a + dim_b,
                              circle_x=circle_x + offset_x, circle_y=circle_y,
                              circle_radius=dim_b)
 
@@ -208,9 +228,7 @@ class GameDrawing:
                     self.triangles.append(Triangle(triangle_value, i, j, x, y))
 
     def draw_board(self):
-        arcade.draw_xywh_rectangle_filled(self.bottom_left_x, self.bottom_left_y,
-                                          self.gboard_width, self.gboard_height,
-                                          cfg.board_color[cfg.theme])
+        self.gboard_list.draw()
         self.cells.draw()
 
     def draw_triangles(self):
@@ -350,5 +368,5 @@ class GameDrawing:
 
     def reload_cell_textures(self):
         for cell in self.cells:
-            # noinspection PyUnresolvedReferences
+            cell: Cell
             cell.reload_texture()
