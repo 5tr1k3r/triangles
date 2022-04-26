@@ -11,7 +11,7 @@ window_width = cc.get('window_width', 800)
 window_height = cc.get('window_height', 800)
 
 cell_size = cc.get('cell_size', 70)
-lane_width = cc.get('line_width', 20)
+lane_width = cc.get('lane_width', 20)
 triangle_size = cc.get('triangle_size', 18)
 start_radius = cc.get('start_radius', 24)
 player_line_width = cc.get('player_line_width', 10)
