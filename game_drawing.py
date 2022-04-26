@@ -35,14 +35,10 @@ class TriangleCoords:
 class Triangle:
     def __init__(self, num: int, x: int, y: int,
                  start_x: float, start_y: float):
-        self.text = arcade.Text(f'{num}', start_x, start_y, cfg.triangle_color[cfg.theme],
-                                font_size=cfg.triangle_text_size,
-                                anchor_x='center', anchor_y='center')
-
         self.num = num
         self.cell_x = x
         self.cell_y = y
-        self.color = cfg.triangle_color[0]
+        self.color = cfg.triangle_color
 
         self.triangle_coords: List[TriangleCoords] = []
         self.find_triangle_coords(start_x, start_y)
@@ -235,8 +231,9 @@ class GameDrawing:
                     self.triangles.append(triangle)
                     for t in triangle.triangle_coords:
                         self.light_layer.add(Light(t.middle_x, t.middle_y,
-                                                   cfg.triangle_size * 1.4,
-                                                   cfg.triangle_color[0], 'soft'))
+                                                   cfg.triangle_size * 1.15,
+                                                   cfg.triangle_lights_color[cfg.theme],
+                                                   'soft'))
 
     def draw_board(self):
         with self.light_layer:
@@ -248,11 +245,8 @@ class GameDrawing:
 
     def draw_triangles(self):
         for triangle in self.triangles:
-            if cfg.numbers_instead_of_triangles:
-                triangle.text.draw()
-            else:
-                for t in triangle.triangle_coords:
-                    arcade.draw_triangle_filled(t.x1, t.y1, t.x2, t.y2, t.x3, t.y3, triangle.color)
+            for t in triangle.triangle_coords:
+                arcade.draw_triangle_filled(t.x1, t.y1, t.x2, t.y2, t.x3, t.y3, triangle.color)
 
     def draw_start(self):
         if self.is_solved:
@@ -344,7 +338,6 @@ class GameDrawing:
                 f'{"H":<{cfg.help_pad}}show solution',
                 f'{"Enter":<{cfg.help_pad}}copy puzzle code',
                 f'{"T":<{cfg.help_pad}}change theme',
-                f'{"N":<{cfg.help_pad}}numbers/triangles',
                 f'{"Z":<{cfg.help_pad}}undo',
                 f'{"F1":<{cfg.help_pad}}help',
         )):
@@ -354,13 +347,11 @@ class GameDrawing:
     def mark_wrong_triangles(self, line: List[Node]):
         for triangle in self.triangles:
             if triangle.num != get_triangle_value(triangle.cell_x, triangle.cell_y, line):
-                triangle.text.color = cfg.wrong_triangle_color
                 triangle.color = cfg.wrong_triangle_color
 
     def reset_triangle_color(self):
         for triangle in self.triangles:
-            triangle.text.color = cfg.triangle_color[cfg.theme]
-            triangle.color = cfg.triangle_color[0]
+            triangle.color = cfg.triangle_color
 
     @staticmethod
     def draw_custom_puzzle_text():
@@ -371,9 +362,9 @@ class GameDrawing:
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
     def update_triangle_colors(self):
-        for triangle in self.triangles:
-            triangle.text.color = cfg.triangle_color[cfg.theme]
-            triangle.color = cfg.triangle_color[0]
+        for light in self.light_layer._lights:
+            light._color = cfg.triangle_lights_color[cfg.theme]
+        self.light_layer._rebuild = True
 
     def create_cell_sprites(self):
         for row in self.gcells:

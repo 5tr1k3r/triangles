@@ -15,8 +15,6 @@ lane_width = cc.get('lane_width', 20)
 triangle_size = cc.get('triangle_size', 18)
 start_radius = cc.get('start_radius', 24)
 player_line_width = cc.get('player_line_width', 10)
-triangle_text_size = cc.get('triangle_text_size', 16)
-numbers_instead_of_triangles = cc.get('numbers_instead_of_triangles', False)
 
 # margin
 text_left_margin = cc.get('text_left_margin', 20)
@@ -51,9 +49,10 @@ theme = cc.get('theme', 0)
 bg_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
 board_color = [(130, 110, 45), (138, 131, 132)]
 cell_color = [arcade.color.SMOKY_BLACK, (163, 178, 207)]
-cell_alpha = 150
+cell_alpha = 180
 solution_color = arcade.color.RED + (170,)
-triangle_color = [(255, 187, 0), arcade.color.BLACK]
+triangle_color = (255, 187, 0)
+triangle_lights_color = [(255, 187, 0), (38, 28, 0)]
 wrong_triangle_color = arcade.color.RED
 line_color = [(254, 213, 135), (228, 191, 167)]
 solved_line_color = (254, 158, 1)
