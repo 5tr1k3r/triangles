@@ -95,15 +95,12 @@ def ponchik_encode(width, height, start, exit_, triangle_values, solution_line):
             else:
                 assert False
 
-    sol = ''
     prev_d = get_direction(solution_line[0], solution_line[1])
     bs += prev_d
-    sol += prev_d
 
     for i in range(2, len(solution_line) - 1):
         d = get_direction(solution_line[i - 1], solution_line[i])
         bs += encode_relative(prev_d, d)
-        sol += encode_relative(prev_d, d)
         prev_d = d
 
     pad = (len(bs) + 3) % 8
