@@ -43,6 +43,13 @@ class Triangle:
         self.triangle_coords: List[TriangleCoords] = []
         self.find_triangle_coords(start_x, start_y)
 
+        self.lights: List[Light] = []
+        for t in self.triangle_coords:
+            self.lights.append(Light(t.middle_x, t.middle_y,
+                                     cfg.triangle_size * 1.15,
+                                     cfg.triangle_lights_color[cfg.theme],
+                                     'soft'))
+
     def find_triangle_coords(self, x: float, y: float):
         margin = 4
         bottom_offset = cfg.triangle_size * math.sqrt(3) / 6
@@ -229,11 +236,7 @@ class GameDrawing:
                 if triangle_value >= 1:
                     triangle = Triangle(triangle_value, i, j, x, y)
                     self.triangles.append(triangle)
-                    for t in triangle.triangle_coords:
-                        self.light_layer.add(Light(t.middle_x, t.middle_y,
-                                                   cfg.triangle_size * 1.15,
-                                                   cfg.triangle_lights_color[cfg.theme],
-                                                   'soft'))
+                    self.light_layer.extend(triangle.lights)
 
     def draw_board(self):
         with self.light_layer:
@@ -348,8 +351,12 @@ class GameDrawing:
         for triangle in self.triangles:
             if triangle.num != get_triangle_value(triangle.cell_x, triangle.cell_y, line):
                 triangle.color = cfg.wrong_triangle_color
+                for light in triangle.lights:
+                    light._color = cfg.wrong_triangle_color
+                self.light_layer._rebuild = True
 
     def reset_triangle_color(self):
+        self.update_triangle_lights_colors()
         for triangle in self.triangles:
             triangle.color = cfg.triangle_color
 
@@ -361,7 +368,7 @@ class GameDrawing:
                          anchor_x='right', anchor_y='baseline',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
-    def update_triangle_colors(self):
+    def update_triangle_lights_colors(self):
         for light in self.light_layer._lights:
             light._color = cfg.triangle_lights_color[cfg.theme]
         self.light_layer._rebuild = True
