@@ -101,10 +101,12 @@ class Cell(arcade.Sprite):
         img = Image.new("RGBA", (cfg.cell_size, cfg.cell_size), cell_color)
         textures.append(arcade.Texture(name=str(cell_color), image=img, hit_box_algorithm=None))
 
-    def __init__(self, left: float, bottom: float):
+    def __init__(self, left: float, bottom: float, x: int, y: int):
         super().__init__(texture=Cell.textures[cfg.theme])
         self.left = left
         self.bottom = bottom
+        self.x = x
+        self.y = y
 
     def reload_texture(self):
         self.texture = Cell.textures[cfg.theme]
@@ -225,7 +227,7 @@ class GameDrawing:
         # middle of the board
         return
 
-    def create_triangle_texts(self):
+    def create_triangles(self):
         self.triangles = []
         self.light_layer._lights = []
         for i, (row, grow) in enumerate(zip(self.board.triangle_values, self.gcells)):
@@ -242,6 +244,11 @@ class GameDrawing:
         with self.light_layer:
             self.gboard_list.draw()
             self.cells.draw()
+
+        self.draw_light_layer()
+        self.draw_triangles()
+        self.draw_start()
+        self.draw_exit()
 
     def draw_light_layer(self):
         self.light_layer.draw(ambient_color=arcade.color.WHITE)
@@ -374,9 +381,9 @@ class GameDrawing:
         self.light_layer._rebuild = True
 
     def create_cell_sprites(self):
-        for row in self.gcells:
-            for x, y in row:
-                cell = Cell(x, y)
+        for i, row in enumerate(self.gcells):
+            for j, (x, y) in enumerate(row):
+                cell = Cell(x, y, i, j)
                 self.cells.append(cell)
 
     def reload_cell_textures(self):

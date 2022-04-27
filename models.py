@@ -1,7 +1,7 @@
 import random
 import time
 from dataclasses import dataclass
-from typing import Tuple, List, Set
+from typing import Tuple, List, Set, Optional
 
 import config as cfg
 from encoding import ponchik_encode, ponchik_decode
@@ -48,14 +48,17 @@ class Board:
         if not (0 <= self.exit[0] <= self.height and 0 <= self.exit[1] <= self.width):
             raise RuntimeError('exit is not within the board dimensions')
 
-        self.triangle_values: List[List[int]] = []
+        self.triangle_values: List[List[int]] = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.solution_line: List[Node] = []
-        self.pg = None
+        self.pg: Optional[PathGenerator] = None
         self.difficulty: int = 0
 
-    def generate_paths(self):
+    def generate_paths(self, min_len=None):
+        if min_len is None:
+            min_len = self.width * self.height
+
         self.pg = PathGenerator(self.width, self.height, self.start, self.exit)
-        self.pg.run()
+        self.pg.run(min_len)
         if not self.pg.paths:
             raise RuntimeError('no paths were generated')
 
@@ -137,6 +140,17 @@ class Board:
         self.triangle_values = [t[i:i + w] for i in range(0, len(t), w)]
         self.solution_line = solution
 
+    def solve(self) -> bool:
+        if self.pg is None:
+            self.generate_paths(min_len=0)
+
+        for path in self.pg.paths:
+            if self.check_solution(path):
+                self.solution_line = path
+                return True
+
+        return False
+
 
 class PathGenerator:
     def __init__(self, w: int, h: int, start: Node, end: Node):
@@ -148,10 +162,9 @@ class PathGenerator:
         self.obstacles = self.add_obstacles(cfg.obstacles_count)
         self.paths: List[FullPath] = []
 
-    def run(self):
+    def run(self, min_len: int):
         total_path_count = 0
         suitable_paths_count = 0
-        min_len = self.w * self.h
         time_end = time.time() + cfg.generation_time_limit
         explored_all_paths = True
 
@@ -256,11 +269,11 @@ def test_obstacles():
 def compare_generated_paths():
     x = 7
     pg_a = PathGenerator(x, x, (0, 0), (x, x))
-    pg_a.run()
+    pg_a.run(x * x)
     paths_a = set([''.join(f"{x}{y}" for x, y in path) for path in pg_a.paths])
 
     pg_b = PathGenerator(x, x, (0, 0), (x, x))
-    pg_b.run()
+    pg_b.run(x * x)
     paths_b = set([''.join(f"{x}{y}" for x, y in path) for path in pg_b.paths])
 
     print(f'total path count {len(paths_a)}')

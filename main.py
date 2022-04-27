@@ -53,7 +53,7 @@ class PlayView(arcade.View):
             self.board.get_solution_line()
             self.board.find_triangle_values()
         self.board.estimate_difficulty()
-        self.gd.create_triangle_texts()
+        self.gd.create_triangles()
 
         self.is_show_solution = False
         self.line = [self.board.start]
@@ -72,10 +72,6 @@ class PlayView(arcade.View):
         self.clear()
 
         self.gd.draw_board()
-        self.gd.draw_light_layer()
-        self.gd.draw_triangles()
-        self.gd.draw_start()
-        self.gd.draw_exit()
         self.gd.draw_line(self.line)
         if self.is_need_to_show_hints():
             self.gd.draw_hints(self.hints)
@@ -289,19 +285,66 @@ class SolveView(arcade.View):
     def __init__(self):
         super().__init__()
 
+        self.board = Board(width=cfg.board_width,
+                           height=cfg.board_height,
+                           bstart=cfg.board_start,
+                           bexit=cfg.board_exit)
+
+        self.gd = GameDrawing(self.board)
+        self.no_solution_found = False
+
+    def on_show(self):
+        arcade.set_background_color(cfg.bg_color[cfg.theme])
+
     def on_draw(self):
         self.clear()
+
+        self.gd.draw_board()
+        if self.board.solution_line:
+            self.gd.draw_solution()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             self.window.show_view(MenuView())
+        elif symbol == arcade.key.SPACE:
+            if not self.board.solution_line:
+                self.no_solution_found = not self.board.solve()
+
+    # noinspection PyUnresolvedReferences
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        cells = arcade.get_sprites_at_point((x, y), self.gd.cells)
+        if not cells:
+            return
+
+        cell = cells[0]
+        change_detected = False
+
+        # left click
+        if button == 1:
+            if self.board.triangle_values[cell.x][cell.y] < 3:
+                self.board.triangle_values[cell.x][cell.y] += 1
+                change_detected = True
+
+        # right click
+        elif self.board.triangle_values[cell.x][cell.y] > 0:
+            self.board.triangle_values[cell.x][cell.y] = 0
+            change_detected = True
+
+        if change_detected:
+            self.board.solution_line = []
+            self.no_solution_found = False
+            self.gd.create_triangles()
+
+    def on_update(self, delta_time: float):
+        if self.no_solution_found:
+            print('no solution found!')
+            self.no_solution_found = False
 
 
 class Triangles(arcade.Window):
     def __init__(self):
         super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
-
-        self.show_view(PlayView())
+        self.show_view(MenuView())
 
 
 def main():
