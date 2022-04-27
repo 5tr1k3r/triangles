@@ -140,16 +140,15 @@ class Board:
         self.triangle_values = [t[i:i + w] for i in range(0, len(t), w)]
         self.solution_line = solution
 
-    def solve(self) -> bool:
+    def solve(self) -> Optional[FullPath]:
         if self.pg is None:
             self.generate_paths(min_len=0)
 
         for path in self.pg.paths:
             if self.check_solution(path):
-                self.solution_line = path
-                return True
+                return path
 
-        return False
+        return
 
 
 class PathGenerator:

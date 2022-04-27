@@ -291,7 +291,6 @@ class SolveView(arcade.View):
                            bexit=cfg.board_exit)
 
         self.gd = GameDrawing(self.board)
-        self.no_solution_found = False
 
     def on_show(self):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -308,7 +307,11 @@ class SolveView(arcade.View):
             self.window.show_view(MenuView())
         elif symbol == arcade.key.SPACE:
             if not self.board.solution_line:
-                self.no_solution_found = not self.board.solve()
+                solution = self.board.solve()
+                if solution:
+                    self.board.solution_line = solution
+                else:
+                    print('no solution found!')
 
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
@@ -332,13 +335,7 @@ class SolveView(arcade.View):
 
         if change_detected:
             self.board.solution_line = []
-            self.no_solution_found = False
             self.gd.create_triangles()
-
-    def on_update(self, delta_time: float):
-        if self.no_solution_found:
-            print('no solution found!')
-            self.no_solution_found = False
 
 
 class Triangles(arcade.Window):
