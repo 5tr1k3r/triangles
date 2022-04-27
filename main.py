@@ -6,13 +6,13 @@ import arcade
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing
+from game_drawing import GameDrawing, MenuOption
 from models import Board, Node, PuzzleStats
 
 
-class Triangles(arcade.Window):
+class PlayView(arcade.View):
     def __init__(self):
-        super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
+        super().__init__()
 
         self.board = Board(width=cfg.board_width,
                            height=cfg.board_height,
@@ -123,7 +123,7 @@ class Triangles(arcade.Window):
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             self.display_final_stats()
-            arcade.close_window()
+            self.window.show_view(MenuView())
         elif symbol == arcade.key.H:
             self.was_solution_shown = True
             self.is_show_solution = not self.is_show_solution
@@ -247,6 +247,61 @@ class Triangles(arcade.Window):
                   f'{(sum(x.time_spent for x in self.puzzle_stats) / puzzles_solved):.1f}s, '
                   f'avg puzzle difficulty '
                   f'{(sum(x.difficulty for x in self.puzzle_stats) / puzzles_solved):.1f}')
+
+
+class MenuView(arcade.View):
+    def __init__(self):
+        super().__init__()
+
+        self.play = MenuOption('Play', cfg.window_width / 2, cfg.window_height / 2 + cfg.menu_vertical_margin)
+        self.solve = MenuOption('Solve', cfg.window_width / 2, cfg.window_height / 2)
+        self.quit = MenuOption('Quit', cfg.window_width / 2, cfg.window_height / 2 - cfg.menu_vertical_margin)
+        self.options = [self.play, self.solve, self.quit]
+
+    def on_show(self):
+        arcade.set_background_color(cfg.menu_bg_color)
+
+    def on_draw(self):
+        self.clear()
+        for option in self.options:
+            option.text.draw()
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.ESCAPE:
+            arcade.close_window()
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        for option in self.options:
+            option.refresh_hover_status(x, y)
+
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        if self.play.is_hovered:
+            self.window.show_view(PlayView())
+
+        if self.solve.is_hovered:
+            self.window.show_view(SolveView())
+
+        if self.quit.is_hovered:
+            arcade.close_window()
+
+
+class SolveView(arcade.View):
+    def __init__(self):
+        super().__init__()
+
+    def on_draw(self):
+        self.clear()
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.ESCAPE:
+            self.window.show_view(MenuView())
+
+
+class Triangles(arcade.Window):
+    def __init__(self):
+        super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
+
+        self.show_view(PlayView())
 
 
 def main():

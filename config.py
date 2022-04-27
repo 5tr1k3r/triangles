@@ -71,3 +71,9 @@ max_paths_generated = cc.get('max_paths_generated', 10000)
 generation_time_limit = cc.get('generation_time_limit', 1.0)
 obstacles_count = cc.get('obstacles_count', 0)
 custom_puzzle_code = cc.get('custom_puzzle_code', None)
+
+menu_vertical_margin = cc.get('menu_vertical_margin', 80)
+menu_font_size = cc.get('menu_font_size', 42)
+menu_font_color = arcade.color.WHITE
+menu_active_color = arcade.color.GREEN
+menu_bg_color = (55, 57, 63)

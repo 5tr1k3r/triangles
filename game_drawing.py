@@ -383,3 +383,26 @@ class GameDrawing:
         for cell in self.cells:
             cell: Cell
             cell.reload_texture()
+
+
+class MenuOption:
+    def __init__(self, text: str, x: float, y: float):
+        self.text = arcade.Text(text, x, y,
+                                cfg.menu_font_color, cfg.menu_font_size,
+                                anchor_x='center', anchor_y='center')
+        self.is_hovered = False
+
+    def refresh_hover_status(self, mouse_x: float, mouse_y: float):
+        new_hover_status = self.is_hovered_over(mouse_x, mouse_y)
+        if new_hover_status != self.is_hovered:
+            self.is_hovered = new_hover_status
+            self.text.color = cfg.menu_active_color if new_hover_status else cfg.menu_font_color
+
+    def is_hovered_over(self, mouse_x: float, mouse_y: float) -> bool:
+        half_width = self.text.content_width / 2
+        half_height = self.text.content_height / 2
+        a = self.text.x - half_width
+        b = self.text.x + half_width
+        c = self.text.y - half_height
+        d = self.text.y + half_height
+        return a <= mouse_x <= b and c <= mouse_y <= d
