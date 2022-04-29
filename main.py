@@ -6,7 +6,7 @@ import arcade
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing, MenuOption, HelpScreen, Popup, SolveButton
+from game_drawing import GameDrawing, MenuOption, HelpScreen, Popup, Button
 from models import Board, Node, PuzzleStats
 
 
