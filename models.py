@@ -121,10 +121,13 @@ class Board:
 
         return conc / magic_conc_number
 
-    def generate_code(self) -> str:
+    def generate_code(self, solution=None) -> str:
+        if solution is None:
+            solution = self.solution_line
+
         triangle_values = [t for row in self.triangle_values for t in row]
         result = ponchik_encode(self.width, self.height, self.start, self.exit,
-                                triangle_values, self.solution_line)
+                                triangle_values, solution)
 
         return result.decode()
 
