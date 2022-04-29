@@ -37,7 +37,6 @@ class PlayView(arcade.View):
             ("Enter", 'copy puzzle code'),
             ("T", 'change theme'),
             ("Z", 'undo'),
-            ("F1", 'help'),
         ])
 
         self.is_show_solution = False
@@ -302,6 +301,11 @@ class SolveView(arcade.View):
                            bexit=cfg.board_exit)
 
         self.gd = GameDrawing(self.board)
+        self.help = HelpScreen([
+            ("Esc", 'quit to menu'),
+            ("Space", 'solve'),
+            ("Enter", 'copy puzzle code'),
+        ])
 
     def on_show(self):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -312,6 +316,11 @@ class SolveView(arcade.View):
         self.gd.draw_board()
         if self.board.solution_line:
             self.gd.draw_solution()
+
+        self.help.draw_tip()
+
+        if self.help.is_shown:
+            self.help.show()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
@@ -332,6 +341,12 @@ class SolveView(arcade.View):
             code = self.board.generate_code(solution)
             pyperclip.copy(code)
             print('Puzzle code copied')
+        elif symbol == arcade.key.F1:
+            self.help.is_shown = True
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.F1:
+            self.help.is_shown = False
 
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
