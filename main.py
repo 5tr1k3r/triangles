@@ -295,16 +295,16 @@ class SolveView(arcade.View):
                 if solution:
                     self.board.solution_line = solution
                 else:
-                    print('No solution found!')
+                    self.window.popup.set('No solution found!')
         elif symbol == arcade.key.ENTER:
             solution = self.board.solve()
             if not solution:
-                print('No solution, cannot copy code')
+                self.window.popup.set('No solution, cannot copy code')
                 return
 
             code = self.board.generate_code(solution)
             pyperclip.copy(code)
-            print('Puzzle code copied')
+            self.window.popup.set('Puzzle code copied')
 
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
