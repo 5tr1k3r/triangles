@@ -282,6 +282,7 @@ class SolveView(arcade.View):
             ('LMB', 'add triangles'),
             ('RMB', 'clear triangles'),
             ("Space", 'solve'),
+            ("R", 'reset board'),
             ("Enter", 'copy puzzle code'),
         ])
         self.solve_button = SolveButton()
@@ -314,6 +315,9 @@ class SolveView(arcade.View):
             code = self.board.generate_code(solution)
             pyperclip.copy(code)
             self.window.popup.set('Puzzle code copied')
+        elif symbol == arcade.key.R:
+            self.board.reset()
+            self.gd.create_triangles()
 
     def solve_puzzle(self):
         if not self.board.solution_line:

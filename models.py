@@ -86,12 +86,12 @@ class Board:
         return True
 
     def estimate_difficulty(self):
-        if self.width < 2 or self.height < 2:
+        triangles_count = len([x for row in self.triangle_values for x in row if x >= 1])
+        if self.width < 2 or self.height < 2 or triangles_count == 0:
             self.difficulty = 0
             return
 
         score = 0
-        triangles_count = len([x for row in self.triangle_values for x in row if x >= 1])
         concentration = triangles_count / (self.width * self.height)
 
         # divide the entire board in 2x2 blocks
@@ -152,6 +152,11 @@ class Board:
                 return path
 
         return
+
+    def reset(self):
+        self.solution_line = []
+        self.triangle_values = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        self.estimate_difficulty()
 
 
 class PathGenerator:
