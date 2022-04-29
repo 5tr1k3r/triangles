@@ -27,7 +27,7 @@ class PlayView(arcade.View):
             self.board.generate_paths()
 
         self.gd = GameDrawing(self.board)
-        self.help = HelpScreen([
+        self.window.help.create_texts([
             ("Esc", 'quit to menu'),
             ("arrows/WASD", 'move line'),
             ("Space", 'start new puzzle'),
@@ -87,14 +87,10 @@ class PlayView(arcade.View):
             self.gd.draw_hints(self.hints)
         if self.is_show_solution:
             self.gd.draw_solution()
-        self.help.draw_tip()
         self.gd.draw_board_difficulty()
         if self.is_custom_puzzle:
             self.gd.draw_custom_puzzle_text()
         self.draw_popup()
-
-        if self.help.is_shown:
-            self.help.show()
 
     def is_line_present(self) -> bool:
         return len(self.line) > 1
@@ -163,8 +159,6 @@ class PlayView(arcade.View):
             else:
                 self.set_popup('Press Space again to confirm...')
                 self.was_given_space_warning = True
-        elif symbol == arcade.key.F1:
-            self.help.is_shown = True
         elif symbol == arcade.key.E:
             self.get_hint()
         elif symbol == arcade.key.ENTER:
@@ -180,10 +174,6 @@ class PlayView(arcade.View):
             self.gd.gboard.reload_texture()
         elif symbol == arcade.key.Z:
             self.undo()
-
-    def on_key_release(self, symbol: int, modifiers: int):
-        if symbol == arcade.key.F1:
-            self.help.is_shown = False
 
     def is_reverting(self, move: Node) -> bool:
         return len(self.line) >= 2 and move == self.line[-2]
@@ -265,6 +255,7 @@ class MenuView(arcade.View):
         self.options = [self.play, self.solve, self.quit]
 
     def on_show(self):
+        self.window.help.texts = []
         arcade.set_background_color(cfg.menu_bg_color)
 
     def on_draw(self):
@@ -301,8 +292,10 @@ class SolveView(arcade.View):
                            bexit=cfg.board_exit)
 
         self.gd = GameDrawing(self.board)
-        self.help = HelpScreen([
+        self.window.help.create_texts([
             ("Esc", 'quit to menu'),
+            ('LMB', 'add triangles'),
+            ('RMB', 'clear triangles'),
             ("Space", 'solve'),
             ("Enter", 'copy puzzle code'),
         ])
@@ -316,11 +309,6 @@ class SolveView(arcade.View):
         self.gd.draw_board()
         if self.board.solution_line:
             self.gd.draw_solution()
-
-        self.help.draw_tip()
-
-        if self.help.is_shown:
-            self.help.show()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
@@ -341,12 +329,6 @@ class SolveView(arcade.View):
             code = self.board.generate_code(solution)
             pyperclip.copy(code)
             print('Puzzle code copied')
-        elif symbol == arcade.key.F1:
-            self.help.is_shown = True
-
-    def on_key_release(self, symbol: int, modifiers: int):
-        if symbol == arcade.key.F1:
-            self.help.is_shown = False
 
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
@@ -376,7 +358,22 @@ class SolveView(arcade.View):
 class Triangles(arcade.Window):
     def __init__(self):
         super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
+
+        self.help = HelpScreen()
+
         self.show_view(MenuView())
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.F1:
+            self.help.is_shown = True
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.F1:
+            self.help.is_shown = False
+
+    def on_draw(self):
+        self.help.draw_tip()
+        self.help.show()
 
 
 def main():

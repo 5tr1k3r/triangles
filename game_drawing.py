@@ -381,8 +381,7 @@ class MenuOption:
 
 
 class HelpScreen:
-    def __init__(self, contents: List[Tuple[str, str]]):
-        self.contents = contents
+    def __init__(self):
         self.is_shown = False
 
         self.tip = arcade.Text(f'F1 - Help',
@@ -390,19 +389,24 @@ class HelpScreen:
                                anchor_x='left', anchor_y='top',
                                font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
+        self.texts = []
+
+    def create_texts(self, lines: List[Tuple[str, str]]):
         levels = [cfg.window_height - cfg.help_top_margin - i * cfg.help_step for i in range(30)]
         self.texts = [arcade.Text('HELP', cfg.window_width // 2, levels[0], anchor_x='center',
                                   font_size=cfg.help_title_font_size, color=cfg.help_font_color,
                                   font_name=cfg.help_font, bold=True)]
 
-        for i, line in enumerate(self.contents):
-            key, desc = line
+        for i, (key, desc) in enumerate(lines):
             self.texts.append(arcade.Text(f'{key:<{cfg.help_pad}}{desc}', cfg.help_text_margin,
                                           levels[i + 2], font_name=cfg.help_font,
                                           anchor_x='left', font_size=cfg.help_font_size,
                                           color=cfg.help_font_color, bold=True))
 
     def show(self):
+        if not self.is_shown or not self.texts:
+            return
+
         arcade.draw_lrtb_rectangle_filled(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
                                           cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
                                           color=cfg.help_bg_color)
@@ -414,4 +418,7 @@ class HelpScreen:
             text.draw()
 
     def draw_tip(self):
+        if not self.texts:
+            return
+
         self.tip.draw()
