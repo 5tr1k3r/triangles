@@ -340,6 +340,14 @@ class GameDrawing:
                          anchor_x='right', anchor_y='baseline',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
+    @staticmethod
+    def draw_selecting_lane_point():
+        arcade.draw_text(f'SELECTING LANE POINT',
+                         cfg.window_width - cfg.text_left_margin,
+                         cfg.help_tip_top_margin + 50,
+                         anchor_x='right', anchor_y='bottom',
+                         font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
+
     def update_triangle_lights_colors(self):
         for light in self.light_layer._lights:
             light._color = cfg.triangle_lights_color[cfg.theme]
@@ -450,13 +458,13 @@ class Popup:
                 self.text = None
 
 
-class SolveButton(arcade.Sprite):
-    def __init__(self):
+class Button(arcade.Sprite):
+    def __init__(self, text: str, x: float, y: float):
         super().__init__(f'assets/img/green_button03.png', hit_box_algorithm='None')
-        self.center_x = cfg.window_width / 2
-        self.bottom = cfg.solve_button_bottom_margin
+        self.center_x = x
+        self.bottom = y
 
-        self.text = arcade.Text('SOLVE', self.center_x, self.bottom + self.height / 2,
+        self.text = arcade.Text(text, self.center_x, self.bottom + self.height / 2,
                                 anchor_x='center', anchor_y='center',
                                 color=arcade.color.BLACK, font_size=cfg.solve_button_font_size)
 

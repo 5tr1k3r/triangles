@@ -286,7 +286,8 @@ class SolveView(arcade.View):
             ("arrows/WASD", 'change board size'),
             ("Enter", 'copy puzzle code'),
         ])
-        self.solve_button = SolveButton()
+
+        self.solve_button = Button('SOLVE', cfg.window_width / 2, cfg.solve_button_bottom_margin)
         self.solve_button_list = arcade.SpriteList()
         self.solve_button_list.append(self.solve_button)
 
