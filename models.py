@@ -147,11 +147,20 @@ class Board:
         if self.pg is None:
             self.generate_paths(min_len=0)
 
+        shortest_path = None
+        path_count = 0
+
         for path in self.pg.paths:
             if self.check_solution(path):
-                return path
+                path_count += 1
 
-        return
+                if shortest_path is None or len(path) < len(shortest_path):
+                    shortest_path = path
+
+        if path_count > 0:
+            print(f'Solutions found: {path_count}')
+
+        return shortest_path
 
     def reset(self):
         self.solution_line = []
