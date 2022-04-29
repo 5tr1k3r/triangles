@@ -283,6 +283,7 @@ class SolveView(arcade.View):
             ('RMB', 'clear triangles'),
             ("Space", 'solve'),
             ("R", 'reset board'),
+            ("arrows/WASD", 'change board size'),
             ("Enter", 'copy puzzle code'),
         ])
         self.solve_button = SolveButton()
@@ -318,6 +319,21 @@ class SolveView(arcade.View):
         elif symbol == arcade.key.R:
             self.board.reset()
             self.gd.create_triangles()
+        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN,
+                        arcade.key.A, arcade.key.W, arcade.key.D, arcade.key.S):
+            board_width = self.board.width
+            board_height = self.board.height
+            if symbol in (arcade.key.LEFT, arcade.key.A):
+                board_width -= 1
+            elif symbol in (arcade.key.UP, arcade.key.W):
+                board_height += 1
+            elif symbol in (arcade.key.RIGHT, arcade.key.D):
+                board_width += 1
+            elif symbol in (arcade.key.DOWN, arcade.key.S):
+                board_height -= 1
+
+            if 1 <= board_width <= cfg.max_board_width and 1 <= board_height <= cfg.max_board_width:
+                self.resize_board(board_width, board_height)
 
     def solve_puzzle(self):
         if not self.board.solution_line:
@@ -356,6 +372,13 @@ class SolveView(arcade.View):
             self.board.solution_line = []
             self.gd.create_triangles()
             self.board.estimate_difficulty()
+
+    def resize_board(self, width: int, height: int):
+        self.board = Board(width=width,
+                           height=height,
+                           bstart=cfg.board_start,
+                           bexit=cfg.board_exit)
+        self.gd = GameDrawing(self.board)
 
 
 class Triangles(arcade.Window):

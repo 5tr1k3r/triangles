@@ -116,7 +116,7 @@ class GBoard(arcade.Sprite):
     def __init__(self, width: int, height: int, left: float, bottom: float):
         self.gboard_textures = []
         for cell_color in cfg.board_color:
-            texture = arcade.Texture.create_empty(f'gboard {cell_color}', (width, height))
+            texture = arcade.Texture.create_empty(f'{width} {height}', (width, height))
             draw = ImageDraw.Draw(texture.image)
             draw.rounded_rectangle([0, 0, width - 1, height - 1], cfg.lane_width // 2, cell_color)
             self.gboard_textures.append(texture)
