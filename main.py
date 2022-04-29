@@ -297,6 +297,7 @@ class SolveView(arcade.View):
         self.gd.draw_board()
         if self.board.solution_line:
             self.gd.draw_solution()
+        self.gd.draw_board_difficulty()
         self.solve_button.draw()
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -350,6 +351,7 @@ class SolveView(arcade.View):
         if change_detected:
             self.board.solution_line = []
             self.gd.create_triangles()
+            self.board.estimate_difficulty()
 
 
 class Triangles(arcade.Window):
