@@ -312,47 +312,12 @@ class GameDrawing:
         arcade.draw_lines([self.glines[x][y] for x, y in hints],
                           cfg.hint_color, line_width=cfg.player_line_width)
 
-    @staticmethod
-    def draw_help_tip():
-        arcade.draw_text(f'F1 - Help',
-                         cfg.text_left_margin, cfg.window_height - cfg.help_tip_top_margin,
-                         anchor_x='left', anchor_y='top',
-                         font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
-
     def draw_board_difficulty(self):
         arcade.draw_text(f'Difficulty: {round(self.board.difficulty)}',
                          cfg.window_width - cfg.text_left_margin,
                          cfg.window_height - cfg.help_tip_top_margin,
                          anchor_x='right', anchor_y='top',
                          font_size=cfg.help_tip_font_size, color=arcade.color.GOLD)
-
-    @staticmethod
-    def show_help_screen():
-        levels = [cfg.window_height - cfg.help_top_margin - i * cfg.help_step for i in range(30)]
-
-        arcade.draw_lrtb_rectangle_filled(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
-                                          cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
-                                          color=cfg.help_bg_color)
-        arcade.draw_lrtb_rectangle_outline(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
-                                           cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
-                                           color=cfg.help_border_color, border_width=cfg.help_border_width)
-        arcade.draw_text('HELP', cfg.window_width // 2, levels[0], anchor_x='center',
-                         font_size=cfg.help_title_font_size, color=cfg.help_font_color,
-                         font_name=cfg.help_font, bold=True)
-        for i, line in enumerate((
-                f'{"Esc":<{cfg.help_pad}}quit',
-                f'{"arrows/WASD":<{cfg.help_pad}}move line',
-                f'{"Space":<{cfg.help_pad}}start new puzzle',
-                f'{"R":<{cfg.help_pad}}reset line',
-                f'{"E":<{cfg.help_pad}}get a hint',
-                f'{"H":<{cfg.help_pad}}show solution',
-                f'{"Enter":<{cfg.help_pad}}copy puzzle code',
-                f'{"T":<{cfg.help_pad}}change theme',
-                f'{"Z":<{cfg.help_pad}}undo',
-                f'{"F1":<{cfg.help_pad}}help',
-        )):
-            arcade.draw_text(line, cfg.help_text_margin, levels[i + 2], font_name=cfg.help_font,
-                             anchor_x='left', font_size=cfg.help_font_size, color=cfg.help_font_color, bold=True)
 
     def mark_wrong_triangles(self, line: List[Node]):
         for triangle in self.triangles:
@@ -413,3 +378,40 @@ class MenuOption:
         c = self.text.y - half_height
         d = self.text.y + half_height
         return a <= mouse_x <= b and c <= mouse_y <= d
+
+
+class HelpScreen:
+    def __init__(self, contents: List[Tuple[str, str]]):
+        self.contents = contents
+        self.is_shown = False
+
+        self.tip = arcade.Text(f'F1 - Help',
+                               cfg.text_left_margin, cfg.window_height - cfg.help_tip_top_margin,
+                               anchor_x='left', anchor_y='top',
+                               font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
+
+        levels = [cfg.window_height - cfg.help_top_margin - i * cfg.help_step for i in range(30)]
+        self.texts = [arcade.Text('HELP', cfg.window_width // 2, levels[0], anchor_x='center',
+                                  font_size=cfg.help_title_font_size, color=cfg.help_font_color,
+                                  font_name=cfg.help_font, bold=True)]
+
+        for i, line in enumerate(self.contents):
+            key, desc = line
+            self.texts.append(arcade.Text(f'{key:<{cfg.help_pad}}{desc}', cfg.help_text_margin,
+                                          levels[i + 2], font_name=cfg.help_font,
+                                          anchor_x='left', font_size=cfg.help_font_size,
+                                          color=cfg.help_font_color, bold=True))
+
+    def show(self):
+        arcade.draw_lrtb_rectangle_filled(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
+                                          cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
+                                          color=cfg.help_bg_color)
+        arcade.draw_lrtb_rectangle_outline(cfg.help_main_margin, cfg.window_width - cfg.help_main_margin,
+                                           cfg.window_height - cfg.help_main_margin, cfg.help_main_margin,
+                                           color=cfg.help_border_color, border_width=cfg.help_border_width)
+
+        for text in self.texts:
+            text.draw()
+
+    def draw_tip(self):
+        self.tip.draw()

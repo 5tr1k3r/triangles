@@ -6,7 +6,7 @@ import arcade
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing, MenuOption
+from game_drawing import GameDrawing, MenuOption, HelpScreen
 from models import Board, Node, PuzzleStats
 
 
@@ -27,6 +27,18 @@ class PlayView(arcade.View):
             self.board.generate_paths()
 
         self.gd = GameDrawing(self.board)
+        self.help = HelpScreen([
+            ("Esc", 'quit to menu'),
+            ("arrows/WASD", 'move line'),
+            ("Space", 'start new puzzle'),
+            ("R", 'reset line'),
+            ("E", 'get a hint'),
+            ("H", 'show solution'),
+            ("Enter", 'copy puzzle code'),
+            ("T", 'change theme'),
+            ("Z", 'undo'),
+            ("F1", 'help'),
+        ])
 
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
@@ -35,7 +47,6 @@ class PlayView(arcade.View):
         self.is_solved = False
         self.is_validated_line = False
         self.has_been_solved_already = False
-        self.is_help_screen = False
         self.puzzle_start_time = None
         self.puzzle_index = 0
         self.popup_alpha = 255
@@ -77,14 +88,14 @@ class PlayView(arcade.View):
             self.gd.draw_hints(self.hints)
         if self.is_show_solution:
             self.gd.draw_solution()
-        self.gd.draw_help_tip()
+        self.help.draw_tip()
         self.gd.draw_board_difficulty()
         if self.is_custom_puzzle:
             self.gd.draw_custom_puzzle_text()
         self.draw_popup()
 
-        if self.is_help_screen:
-            self.gd.show_help_screen()
+        if self.help.is_shown:
+            self.help.show()
 
     def is_line_present(self) -> bool:
         return len(self.line) > 1
@@ -154,7 +165,7 @@ class PlayView(arcade.View):
                 self.set_popup('Press Space again to confirm...')
                 self.was_given_space_warning = True
         elif symbol == arcade.key.F1:
-            self.is_help_screen = True
+            self.help.is_shown = True
         elif symbol == arcade.key.E:
             self.get_hint()
         elif symbol == arcade.key.ENTER:
@@ -173,7 +184,7 @@ class PlayView(arcade.View):
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.F1:
-            self.is_help_screen = False
+            self.help.is_shown = False
 
     def is_reverting(self, move: Node) -> bool:
         return len(self.line) >= 2 and move == self.line[-2]
