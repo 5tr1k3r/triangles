@@ -437,7 +437,10 @@ class Popup:
         self.alpha = 255
         self.text = None
 
-    def set(self, text: str, color=cfg.popup_color[cfg.theme]):
+    def set(self, text: str, color=None):
+        if color is None:
+            color = cfg.popup_color[cfg.theme]
+
         print(text)
         self.alpha = 255
         self.text = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
