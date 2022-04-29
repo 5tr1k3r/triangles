@@ -422,3 +422,29 @@ class HelpScreen:
             return
 
         self.tip.draw()
+
+
+class Popup:
+    def __init__(self):
+        self.alpha = 255
+        self.text = None
+
+    def set(self, text: str):
+        print(text)
+        self.alpha = 255
+        self.text = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
+                                anchor_x='center', anchor_y='center',
+                                font_size=cfg.popup_font_size,
+                                color=cfg.popup_color[cfg.theme])
+
+    def show(self):
+        if self.text:
+            self.text.color = self.text.color[:3] + (self.alpha,)
+            self.text.draw()
+
+    def update(self):
+        if self.text:
+            new_alpha = max(0, self.alpha - cfg.popup_alpha_step)
+            self.alpha = new_alpha
+            if new_alpha == 0:
+                self.text = None

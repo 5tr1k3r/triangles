@@ -6,7 +6,7 @@ import arcade
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing, MenuOption, HelpScreen
+from game_drawing import GameDrawing, MenuOption, HelpScreen, Popup
 from models import Board, Node, PuzzleStats
 
 
@@ -48,8 +48,6 @@ class PlayView(arcade.View):
         self.has_been_solved_already = False
         self.puzzle_start_time = None
         self.puzzle_index = 0
-        self.popup_alpha = 255
-        self.popup = None
         self.was_solution_shown = False
         self.was_given_space_warning = False
         self.puzzle_stats: List[PuzzleStats] = []
@@ -90,7 +88,6 @@ class PlayView(arcade.View):
         self.gd.draw_board_difficulty()
         if self.is_custom_puzzle:
             self.gd.draw_custom_puzzle_text()
-        self.draw_popup()
 
     def is_line_present(self) -> bool:
         return len(self.line) > 1
@@ -103,7 +100,6 @@ class PlayView(arcade.View):
         self.gd.is_solved = self.is_solved
 
         self.check_validation()
-        self.update_popup()
 
     def check_validation(self):
         if self.line[-1] == self.board.exit:
@@ -151,20 +147,20 @@ class PlayView(arcade.View):
                 self.line += (move,)
         elif symbol == arcade.key.SPACE:
             if self.is_custom_puzzle:
-                self.set_popup('Not available in custom puzzle mode')
+                self.window.popup.set('Not available in custom puzzle mode')
                 return
 
             if self.has_been_solved_already or self.was_given_space_warning:
                 self.start_new_puzzle()
             else:
-                self.set_popup('Press Space again to confirm...')
+                self.window.popup.set('Press Space again to confirm...')
                 self.was_given_space_warning = True
         elif symbol == arcade.key.E:
             self.get_hint()
         elif symbol == arcade.key.ENTER:
             code = self.board.generate_code()
             pyperclip.copy(code)
-            self.set_popup('Puzzle code copied')
+            self.window.popup.set('Puzzle code copied')
         elif symbol == arcade.key.T:
             cfg.theme = int(not cfg.theme)
             arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -202,33 +198,13 @@ class PlayView(arcade.View):
             num = len(self.hints_used)
             s = 's' if num > 1 else ''
             text += f' and {num} hint{s}'
-        self.set_popup(text)
-
-    def set_popup(self, text: str):
-        print(text)
-        self.popup_alpha = 255
-        self.popup = arcade.Text(text, cfg.window_width / 2, cfg.window_height - cfg.popup_top_margin,
-                                 anchor_x='center', anchor_y='center',
-                                 font_size=cfg.popup_font_size,
-                                 color=cfg.popup_color[cfg.theme])
-
-    def update_popup(self):
-        if self.popup:
-            new_alpha = max(0, self.popup_alpha - cfg.popup_alpha_step)
-            self.popup_alpha = new_alpha
-            if new_alpha == 0:
-                self.popup = None
-
-    def draw_popup(self):
-        if self.popup:
-            self.popup.color = self.popup.color[:3] + (self.popup_alpha,)
-            self.popup.draw()
+        self.window.popup.set(text)
 
     def get_hint(self):
         all_solution_segments = set(range(len(self.board.solution_line) - 1))
         valid_hint_choices = list(all_solution_segments - self.hints_used)
         if not valid_hint_choices:
-            self.set_popup('Ran out of hints :D')
+            self.window.popup.set('Ran out of hints :D')
             return
 
         chosen_hint = random.choice(valid_hint_choices)
@@ -360,6 +336,7 @@ class Triangles(arcade.Window):
         super().__init__(cfg.window_width, cfg.window_height, 'Triangles', center_window=True)
 
         self.help = HelpScreen()
+        self.popup = Popup()
 
         self.show_view(MenuView())
 
@@ -373,7 +350,11 @@ class Triangles(arcade.Window):
 
     def on_draw(self):
         self.help.draw_tip()
+        self.popup.show()
         self.help.show()
+
+    def on_update(self, delta_time: float):
+        self.popup.update()
 
 
 def main():
