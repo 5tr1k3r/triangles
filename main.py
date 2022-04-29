@@ -1,7 +1,7 @@
 import math
 import random
 import time
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Optional
 
 import arcade
 import pyperclip
@@ -12,7 +12,7 @@ from models import Board, Node, PuzzleStats
 
 
 class PlayView(arcade.View):
-    def __init__(self, is_custom_puzzle: bool = False):
+    def __init__(self, custom_puzzle_code: Optional[str] = None):
         super().__init__()
 
         self.board = Board(width=cfg.board_width,
@@ -20,9 +20,9 @@ class PlayView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
 
-        if is_custom_puzzle:
+        if custom_puzzle_code is not None:
             self.is_custom_puzzle = True
-            self.board.load_custom_puzzle(cfg.custom_puzzle_code)
+            self.board.load_custom_puzzle(custom_puzzle_code)
         else:
             self.is_custom_puzzle = False
             self.board.generate_paths()
@@ -259,7 +259,7 @@ class MenuView(arcade.View):
                 self.window.popup.set('No puzzle code found', color=cfg.menu_popup_color)
                 return
 
-            self.window.show_view(PlayView(is_custom_puzzle=True))
+            self.window.show_view(PlayView(cfg.custom_puzzle_code))
 
         elif self.solve.is_hovered:
             self.window.show_view(SolveView())
@@ -300,6 +300,10 @@ class SolveView(arcade.View):
         self.move_exit_list = arcade.SpriteList()
         self.move_exit_list.append(self.move_exit_btn)
 
+        self.play_btn = Button('Play', cfg.window_width * 0.5, cfg.solve_button_bottom_margin * 4)
+        self.play_btn_list = arcade.SpriteList()
+        self.play_btn_list.append(self.play_btn)
+
         self.is_selecting_start = False
         self.is_selecting_exit = False
 
@@ -316,6 +320,7 @@ class SolveView(arcade.View):
         self.solve_button.draw()
         self.move_start_btn.draw()
         self.move_exit_btn.draw()
+        self.play_btn.draw()
         if self.is_selecting_lane_point():
             self.gd.draw_selecting_lane_point()
 
@@ -394,6 +399,17 @@ class SolveView(arcade.View):
         if move_exit_list:
             self.window.popup.set('Selecting exit...')
             self.is_selecting_exit = True
+            return
+
+        play_list = arcade.get_sprites_at_point((x, y), self.play_btn_list)
+        if play_list:
+            solution = self.board.solve()
+            if not solution:
+                self.window.popup.set('Not solvable, cannot play this')
+                return
+
+            code = self.board.generate_code(solution)
+            self.window.show_view(PlayView(code))
             return
 
         cells = arcade.get_sprites_at_point((x, y), self.gd.cells)
