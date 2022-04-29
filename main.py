@@ -1,6 +1,7 @@
+import math
 import random
 import time
-from typing import List, Set
+from typing import List, Set, Tuple
 
 import arcade
 import pyperclip
@@ -291,6 +292,17 @@ class SolveView(arcade.View):
         self.solve_button_list = arcade.SpriteList()
         self.solve_button_list.append(self.solve_button)
 
+        self.move_start_btn = Button('Move start', cfg.window_width * 0.2, cfg.solve_button_bottom_margin)
+        self.move_start_list = arcade.SpriteList()
+        self.move_start_list.append(self.move_start_btn)
+
+        self.move_exit_btn = Button('Move exit', cfg.window_width * 0.8, cfg.solve_button_bottom_margin)
+        self.move_exit_list = arcade.SpriteList()
+        self.move_exit_list.append(self.move_exit_btn)
+
+        self.is_selecting_start = False
+        self.is_selecting_exit = False
+
     def on_show(self):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
 
@@ -302,8 +314,16 @@ class SolveView(arcade.View):
             self.gd.draw_solution()
         self.gd.draw_board_difficulty()
         self.solve_button.draw()
+        self.move_start_btn.draw()
+        self.move_exit_btn.draw()
+        if self.is_selecting_lane_point():
+            self.gd.draw_selecting_lane_point()
 
     def on_key_press(self, symbol: int, modifiers: int):
+        if self.is_selecting_lane_point() and symbol == arcade.key.ESCAPE:
+            self.stop_selecting_lane_point()
+            return
+
         if symbol == arcade.key.ESCAPE:
             self.window.show_view(MenuView())
         elif symbol == arcade.key.SPACE:
@@ -336,6 +356,13 @@ class SolveView(arcade.View):
             if 1 <= board_width <= cfg.max_board_width and 1 <= board_height <= cfg.max_board_width:
                 self.resize_board(board_width, board_height)
 
+    def is_selecting_lane_point(self) -> bool:
+        return self.is_selecting_start or self.is_selecting_exit
+
+    def stop_selecting_lane_point(self):
+        self.is_selecting_start = False
+        self.is_selecting_exit = False
+
     def solve_puzzle(self):
         if not self.board.solution_line:
             solution = self.board.solve()
@@ -346,9 +373,27 @@ class SolveView(arcade.View):
 
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        if self.is_selecting_lane_point():
+            lane_x, lane_y = self.select_lane_point(x, y)
+            self.move_start_or_exit(lane_x, lane_y)
+            self.stop_selecting_lane_point()
+            return
+
         solve_button_list = arcade.get_sprites_at_point((x, y), self.solve_button_list)
         if solve_button_list:
             self.solve_puzzle()
+            return
+
+        move_start_list = arcade.get_sprites_at_point((x, y), self.move_start_list)
+        if move_start_list:
+            self.window.popup.set('Selecting start...')
+            self.is_selecting_start = True
+            return
+
+        move_exit_list = arcade.get_sprites_at_point((x, y), self.move_exit_list)
+        if move_exit_list:
+            self.window.popup.set('Selecting exit...')
+            self.is_selecting_exit = True
             return
 
         cells = arcade.get_sprites_at_point((x, y), self.gd.cells)
@@ -380,6 +425,51 @@ class SolveView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
         self.gd = GameDrawing(self.board)
+
+    def move_start_or_exit(self, x: int, y: int):
+        bstart = self.board.start
+        bexit = self.board.exit
+
+        if self.is_selecting_start:
+            if (x, y) == bexit:
+                self.window.popup.set('Cannot move start to exit point!')
+                return
+
+            bstart = x, y
+            self.window.popup.set(f'Start is now at {(x, y)}')
+
+        elif self.is_selecting_exit:
+            if (x, y) == bstart:
+                self.window.popup.set('Cannot move exit to start point!')
+                return
+
+            bexit = x, y
+            self.window.popup.set(f'Exit is now at {(x, y)}')
+
+        triangles = self.board.triangle_values
+        self.board = Board(width=self.board.width,
+                           height=self.board.height,
+                           bstart=bstart,
+                           bexit=bexit)
+        self.board.triangle_values = triangles
+        self.board.estimate_difficulty()
+        self.gd = GameDrawing(self.board)
+        self.gd.create_triangles()
+
+    def select_lane_point(self, mouse_x: float, mouse_y: float) -> Tuple[int, int]:
+        low_dist = float('inf')
+        low_x = 0
+        low_y = 0
+
+        for i, row in enumerate(self.gd.glines):
+            for j, (x, y) in enumerate(row):
+                dist = math.hypot(mouse_x - x, mouse_y - y)
+                if dist < low_dist:
+                    low_dist = dist
+                    low_x = i
+                    low_y = j
+
+        return low_x, low_y
 
 
 class Triangles(arcade.Window):
