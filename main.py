@@ -11,7 +11,7 @@ from models import Board, Node, PuzzleStats
 
 
 class PlayView(arcade.View):
-    def __init__(self):
+    def __init__(self, is_custom_puzzle: bool = False):
         super().__init__()
 
         self.board = Board(width=cfg.board_width,
@@ -19,7 +19,7 @@ class PlayView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
 
-        if cfg.custom_puzzle_code is not None:
+        if is_custom_puzzle:
             self.is_custom_puzzle = True
             self.board.load_custom_puzzle(cfg.custom_puzzle_code)
         else:
@@ -225,10 +225,12 @@ class MenuView(arcade.View):
     def __init__(self):
         super().__init__()
 
-        self.play = MenuOption('Play', cfg.window_width / 2, cfg.window_height / 2 + cfg.menu_vertical_margin)
+        self.play = MenuOption('Play', cfg.window_width / 2, cfg.window_height / 2 + cfg.menu_vertical_margin * 2)
+        self.play_custom = MenuOption('Play custom puzzle', cfg.window_width / 2,
+                                      cfg.window_height / 2 + cfg.menu_vertical_margin)
         self.solve = MenuOption('Solve', cfg.window_width / 2, cfg.window_height / 2)
         self.quit = MenuOption('Quit', cfg.window_width / 2, cfg.window_height / 2 - cfg.menu_vertical_margin)
-        self.options = [self.play, self.solve, self.quit]
+        self.options = [self.play, self.play_custom, self.solve, self.quit]
 
     def on_show(self):
         self.window.help.texts = []
@@ -251,10 +253,17 @@ class MenuView(arcade.View):
         if self.play.is_hovered:
             self.window.show_view(PlayView())
 
-        if self.solve.is_hovered:
+        elif self.play_custom.is_hovered:
+            if cfg.custom_puzzle_code is None:
+                self.window.popup.set('No puzzle code found', color=cfg.menu_popup_color)
+                return
+
+            self.window.show_view(PlayView(is_custom_puzzle=True))
+
+        elif self.solve.is_hovered:
             self.window.show_view(SolveView())
 
-        if self.quit.is_hovered:
+        elif self.quit.is_hovered:
             arcade.close_window()
 
 

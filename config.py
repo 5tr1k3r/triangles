@@ -77,3 +77,4 @@ menu_font_size = cc.get('menu_font_size', 42)
 menu_font_color = arcade.color.WHITE
 menu_active_color = arcade.color.GREEN
 menu_bg_color = (55, 57, 63)
+menu_popup_color = arcade.color.RED
