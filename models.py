@@ -72,9 +72,9 @@ class Board:
 
             for j in range(self.width):
                 triangle_value = get_triangle_value(i, j, self.solution_line)
-                # negative value means we're gonna hide this triangle
+                # 0 means we're gonna hide this triangle
                 if random.random() < cfg.hide_triangle_probability:
-                    triangle_value *= -1
+                    triangle_value = 0
                 self.triangle_values[i].append(triangle_value)
 
     def check_solution(self, line: List[Node]) -> bool:

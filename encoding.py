@@ -90,7 +90,7 @@ def ponchik_encode(width, height, start, exit_, triangle_values, solution_line):
             computed = get_triangle_value(i, j, all_sublines)
             if computed == triangle_values[i * width + j]:
                 bs += "0"
-            elif computed == -triangle_values[i * width + j]:
+            elif triangle_values[i * width + j] == 0:
                 bs += "1"
             else:
                 assert False
