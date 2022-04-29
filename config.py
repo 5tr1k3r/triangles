@@ -78,3 +78,6 @@ menu_font_color = arcade.color.WHITE
 menu_active_color = arcade.color.GREEN
 menu_bg_color = (55, 57, 63)
 menu_popup_color = arcade.color.RED
+
+solve_button_font_size = cc.get('solve_button_font_size', 24)
+solve_button_bottom_margin = cc.get('solve_button_bottom_margin', 20)

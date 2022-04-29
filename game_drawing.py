@@ -448,3 +448,18 @@ class Popup:
             self.alpha = new_alpha
             if new_alpha == 0:
                 self.text = None
+
+
+class SolveButton(arcade.Sprite):
+    def __init__(self):
+        super().__init__(f'assets/img/green_button03.png', hit_box_algorithm='None')
+        self.center_x = cfg.window_width / 2
+        self.bottom = cfg.solve_button_bottom_margin
+
+        self.text = arcade.Text('SOLVE', self.center_x, self.bottom + self.height / 2,
+                                anchor_x='center', anchor_y='center',
+                                color=arcade.color.BLACK, font_size=cfg.solve_button_font_size)
+
+    def draw(self, **kwargs):
+        super().draw(**kwargs)
+        self.text.draw()

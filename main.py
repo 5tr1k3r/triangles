@@ -6,7 +6,7 @@ import arcade
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing, MenuOption, HelpScreen, Popup
+from game_drawing import GameDrawing, MenuOption, HelpScreen, Popup, SolveButton
 from models import Board, Node, PuzzleStats
 
 
@@ -284,6 +284,9 @@ class SolveView(arcade.View):
             ("Space", 'solve'),
             ("Enter", 'copy puzzle code'),
         ])
+        self.solve_button = SolveButton()
+        self.solve_button_list = arcade.SpriteList()
+        self.solve_button_list.append(self.solve_button)
 
     def on_show(self):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -294,17 +297,13 @@ class SolveView(arcade.View):
         self.gd.draw_board()
         if self.board.solution_line:
             self.gd.draw_solution()
+        self.solve_button.draw()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             self.window.show_view(MenuView())
         elif symbol == arcade.key.SPACE:
-            if not self.board.solution_line:
-                solution = self.board.solve()
-                if solution:
-                    self.board.solution_line = solution
-                else:
-                    self.window.popup.set('No solution found!')
+            self.solve_puzzle()
         elif symbol == arcade.key.ENTER:
             solution = self.board.solve()
             if not solution:
@@ -315,8 +314,21 @@ class SolveView(arcade.View):
             pyperclip.copy(code)
             self.window.popup.set('Puzzle code copied')
 
+    def solve_puzzle(self):
+        if not self.board.solution_line:
+            solution = self.board.solve()
+            if solution:
+                self.board.solution_line = solution
+            else:
+                self.window.popup.set('No solution found!')
+
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        solve_button_list = arcade.get_sprites_at_point((x, y), self.solve_button_list)
+        if solve_button_list:
+            self.solve_puzzle()
+            return
+
         cells = arcade.get_sprites_at_point((x, y), self.gd.cells)
         if not cells:
             return
