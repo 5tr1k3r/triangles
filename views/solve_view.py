@@ -1,12 +1,12 @@
 import math
-from typing import Tuple
+from typing import Tuple, List, Optional
 
 import arcade
 import pyperclip
 
 import config as cfg
 from game_drawing import GameDrawing, Button
-from models import Board
+from models import Board, FullPath
 
 
 class SolveView(arcade.View):
@@ -18,7 +18,7 @@ class SolveView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
 
-        self.gd = None
+        self.gd: Optional[GameDrawing] = None
         self.create_game_drawing()
 
         self.solve_button = Button('SOLVE', cfg.window_width / 2, cfg.solve_button_bottom_margin)
@@ -39,9 +39,15 @@ class SolveView(arcade.View):
 
         self.is_selecting_start = False
         self.is_selecting_exit = False
+        self.solutions: List[FullPath] = []
+        self.current_solution = 0
 
     def create_game_drawing(self):
         self.gd = GameDrawing(self.board, 90 + cfg.solve_button_bottom_margin * 2)
+
+    def reset_solutions(self):
+        self.solutions = []
+        self.current_solution = 0
 
     def on_show_view(self):
         self.window.help.create_texts([
@@ -51,6 +57,7 @@ class SolveView(arcade.View):
             ("Space", 'solve'),
             ("R", 'reset board'),
             ("arrows", 'change board size'),
+            ("UIOP", 'navigate solutions'),
             ("Enter", 'copy puzzle code'),
         ])
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -68,6 +75,9 @@ class SolveView(arcade.View):
         self.play_btn.draw()
         if self.is_selecting_lane_point():
             self.gd.draw_selecting_lane_point()
+        if self.solutions:
+            self.gd.draw_solution_info(self.current_solution, len(self.solutions),
+                                       len(self.solutions[self.current_solution]) - 1)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.is_selecting_lane_point() and symbol == arcade.key.ESCAPE:
@@ -89,7 +99,16 @@ class SolveView(arcade.View):
             self.window.popup.set('Puzzle code copied')
         elif symbol == arcade.key.R:
             self.board.reset()
+            self.reset_solutions()
             self.gd.create_triangles()
+        elif symbol == arcade.key.U:
+            self.show_first_solution()
+        elif symbol == arcade.key.I:
+            self.show_previous_solution()
+        elif symbol == arcade.key.O:
+            self.show_next_solution()
+        elif symbol == arcade.key.P:
+            self.show_last_solution()
         elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN):
             board_width = self.board.width
             board_height = self.board.height
@@ -113,9 +132,10 @@ class SolveView(arcade.View):
         self.is_selecting_exit = False
 
     def solve_puzzle(self):
-        if not self.board.solution_line:
+        if not self.solutions:
             solutions = self.board.solve()
             if solutions:
+                self.solutions = solutions
                 self.board.solution_line = solutions[0]
             else:
                 self.window.popup.set('No solution found!')
@@ -175,6 +195,7 @@ class SolveView(arcade.View):
             change_detected = True
 
         if change_detected:
+            self.reset_solutions()
             self.board.solution_line = []
             self.gd.create_triangles()
             self.board.estimate_difficulty()
@@ -185,6 +206,7 @@ class SolveView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
         self.create_game_drawing()
+        self.reset_solutions()
 
     def move_start_or_exit(self, x: int, y: int):
         bstart = self.board.start
@@ -215,6 +237,7 @@ class SolveView(arcade.View):
         self.board.estimate_difficulty()
         self.create_game_drawing()
         self.gd.create_triangles()
+        self.reset_solutions()
 
     def select_lane_point(self, mouse_x: float, mouse_y: float) -> Tuple[int, int]:
         low_dist = float('inf')
@@ -230,3 +253,22 @@ class SolveView(arcade.View):
                     low_y = j
 
         return low_x, low_y
+
+    def show_solution_n(self, n: int):
+        if not self.solutions or n < 0 or n > len(self.solutions) - 1:
+            return
+
+        self.current_solution = n
+        self.board.solution_line = self.solutions[n]
+
+    def show_first_solution(self):
+        self.show_solution_n(0)
+
+    def show_previous_solution(self):
+        self.show_solution_n(self.current_solution - 1)
+
+    def show_next_solution(self):
+        self.show_solution_n(self.current_solution + 1)
+
+    def show_last_solution(self):
+        self.show_solution_n(len(self.solutions) - 1)

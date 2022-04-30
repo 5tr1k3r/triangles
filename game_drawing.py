@@ -342,11 +342,20 @@ class GameDrawing:
 
     @staticmethod
     def draw_selecting_lane_point():
+        # todo tidy up coords
         arcade.draw_text(f'SELECTING LANE POINT',
                          cfg.window_width - cfg.text_left_margin,
-                         cfg.help_tip_top_margin + 50,
-                         anchor_x='right', anchor_y='bottom',
+                         cfg.solve_button_bottom_margin * 2 + 45 + 22,
+                         anchor_x='right', anchor_y='center',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
+
+    @staticmethod
+    def draw_solution_info(current_solution: int, total_count: int, solution_length: int):
+        arcade.draw_text(f'{current_solution + 1}/{total_count} ({solution_length} long)',
+                         cfg.window_width * 0.2,
+                         cfg.solve_button_bottom_margin * 2 + 45 + 22,
+                         anchor_x='center', anchor_y='center',
+                         font_size=20, color=arcade.color.GOLD)
 
     def update_triangle_lights_colors(self):
         for light in self.light_layer._lights:
