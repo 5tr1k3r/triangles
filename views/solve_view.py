@@ -21,16 +21,6 @@ class SolveView(arcade.View):
         self.gd = None
         self.create_game_drawing()
 
-        self.window.help.create_texts([
-            ("Esc", 'quit to menu'),
-            ('LMB', 'add triangles'),
-            ('RMB', 'clear triangles'),
-            ("Space", 'solve'),
-            ("R", 'reset board'),
-            ("arrows/WASD", 'change board size'),
-            ("Enter", 'copy puzzle code'),
-        ])
-
         self.solve_button = Button('SOLVE', cfg.window_width / 2, cfg.solve_button_bottom_margin)
         self.solve_button_list = arcade.SpriteList()
         self.solve_button_list.append(self.solve_button)
@@ -53,7 +43,16 @@ class SolveView(arcade.View):
     def create_game_drawing(self):
         self.gd = GameDrawing(self.board, 90 + cfg.solve_button_bottom_margin * 2)
 
-    def on_show(self):
+    def on_show_view(self):
+        self.window.help.create_texts([
+            ("Esc", 'quit to menu'),
+            ('LMB', 'add triangles'),
+            ('RMB', 'clear triangles'),
+            ("Space", 'solve'),
+            ("R", 'reset board'),
+            ("arrows/WASD", 'change board size'),
+            ("Enter", 'copy puzzle code'),
+        ])
         arcade.set_background_color(cfg.bg_color[cfg.theme])
 
     def on_draw(self):

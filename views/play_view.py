@@ -27,17 +27,6 @@ class PlayView(arcade.View):
             self.board.generate_paths()
 
         self.gd = GameDrawing(self.board)
-        self.window.help.create_texts([
-            ("Esc", 'quit to menu'),
-            ("arrows/WASD", 'move line'),
-            ("Space", 'start new puzzle'),
-            ("R", 'reset line'),
-            ("E", 'get a hint'),
-            ("H", 'show solution'),
-            ("Enter", 'copy puzzle code'),
-            ("T", 'change theme'),
-            ("Z", 'undo'),
-        ])
 
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
@@ -52,9 +41,21 @@ class PlayView(arcade.View):
         self.was_given_space_warning = False
         self.puzzle_stats: List[PuzzleStats] = []
 
-        arcade.set_background_color(cfg.bg_color[cfg.theme])
-
         self.start_new_puzzle()
+
+    def on_show_view(self):
+        self.window.help.create_texts([
+            ("Esc", 'quit to menu'),
+            ("arrows/WASD", 'move line'),
+            ("Space", 'start new puzzle'),
+            ("R", 'reset line'),
+            ("E", 'get a hint'),
+            ("H", 'show solution'),
+            ("Enter", 'copy puzzle code'),
+            ("T", 'change theme'),
+            ("Z", 'undo'),
+        ])
+        arcade.set_background_color(cfg.bg_color[cfg.theme])
 
     def start_new_puzzle(self):
         if not self.is_custom_puzzle:

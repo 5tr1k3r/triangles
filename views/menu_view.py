@@ -15,7 +15,7 @@ class MenuView(arcade.View):
         self.quit = MenuOption('Quit', cfg.window_width / 2, cfg.window_height / 2 - cfg.menu_vertical_margin)
         self.options = [self.play, self.play_custom, self.solve, self.quit]
 
-    def on_show(self):
+    def on_show_view(self):
         self.window.help.texts = []
         arcade.set_background_color(cfg.menu_bg_color)
 
