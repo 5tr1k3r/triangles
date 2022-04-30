@@ -18,7 +18,9 @@ class SolveView(arcade.View):
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
 
-        self.gd = GameDrawing(self.board)
+        self.gd = None
+        self.create_game_drawing()
+
         self.window.help.create_texts([
             ("Esc", 'quit to menu'),
             ('LMB', 'add triangles'),
@@ -47,6 +49,9 @@ class SolveView(arcade.View):
 
         self.is_selecting_start = False
         self.is_selecting_exit = False
+
+    def create_game_drawing(self):
+        self.gd = GameDrawing(self.board, 90 + cfg.solve_button_bottom_margin * 2)
 
     def on_show(self):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -181,7 +186,7 @@ class SolveView(arcade.View):
                            height=height,
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
-        self.gd = GameDrawing(self.board)
+        self.create_game_drawing()
 
     def move_start_or_exit(self, x: int, y: int):
         bstart = self.board.start
@@ -210,7 +215,7 @@ class SolveView(arcade.View):
                            bexit=bexit)
         self.board.triangle_values = triangles
         self.board.estimate_difficulty()
-        self.gd = GameDrawing(self.board)
+        self.create_game_drawing()
         self.gd.create_triangles()
 
     def select_lane_point(self, mouse_x: float, mouse_y: float) -> Tuple[int, int]:

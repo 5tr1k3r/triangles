@@ -130,12 +130,12 @@ class GBoard(arcade.Sprite):
 
 
 class GameDrawing:
-    def __init__(self, board: Board):
+    def __init__(self, board: Board, bottom_panel_height: float = 0):
         self.board = board
         self.gboard_width = cfg.cell_size * self.board.width + cfg.lane_width * (self.board.width + 1)
         self.gboard_height = cfg.cell_size * self.board.height + cfg.lane_width * (self.board.height + 1)
         self.bottom_left_x = (cfg.window_width - self.gboard_width) / 2
-        self.bottom_left_y = (cfg.window_height - self.gboard_height) / 2
+        self.bottom_left_y = (cfg.window_height - self.gboard_height) / 2 + bottom_panel_height / 2
 
         self.gcells = self.get_cell_coords()
         self.glines = self.get_lines_coords()
