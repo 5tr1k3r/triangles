@@ -75,12 +75,12 @@ class SolveView(arcade.View):
         elif symbol == arcade.key.SPACE:
             self.solve_puzzle()
         elif symbol == arcade.key.ENTER:
-            solution = self.board.solve()
-            if not solution:
+            solutions = self.board.solve()
+            if not solutions:
                 self.window.popup.set('No solution, cannot copy code')
                 return
 
-            code = self.board.generate_code(solution)
+            code = self.board.generate_code(solutions[0])
             pyperclip.copy(code)
             self.window.popup.set('Puzzle code copied')
         elif symbol == arcade.key.R:
@@ -111,9 +111,9 @@ class SolveView(arcade.View):
 
     def solve_puzzle(self):
         if not self.board.solution_line:
-            solution = self.board.solve()
-            if solution:
-                self.board.solution_line = solution
+            solutions = self.board.solve()
+            if solutions:
+                self.board.solution_line = solutions[0]
             else:
                 self.window.popup.set('No solution found!')
 
@@ -144,12 +144,12 @@ class SolveView(arcade.View):
 
         play_list = arcade.get_sprites_at_point((x, y), self.play_btn_list)
         if play_list:
-            solution = self.board.solve()
-            if not solution:
+            solutions = self.board.solve()
+            if not solutions:
                 self.window.popup.set('Not solvable, cannot play this')
                 return
 
-            code = self.board.generate_code(solution)
+            code = self.board.generate_code(solutions[0])
             self.window.vm.show_play_view_with_custom_puzzle(code)
             return
 

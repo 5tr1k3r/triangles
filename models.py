@@ -143,24 +143,18 @@ class Board:
         self.triangle_values = [t[i:i + w] for i in range(0, len(t), w)]
         self.solution_line = solution
 
-    def solve(self) -> Optional[FullPath]:
+    def solve(self) -> List[FullPath]:
         if self.pg is None:
             self.generate_paths(min_len=0)
 
-        shortest_path = None
-        path_count = 0
+        solutions = []
 
         for path in self.pg.paths:
             if self.check_solution(path):
-                path_count += 1
+                solutions.append(path)
 
-                if shortest_path is None or len(path) < len(shortest_path):
-                    shortest_path = path
-
-        if path_count > 0:
-            print(f'Solutions found: {path_count}')
-
-        return shortest_path
+        solutions.sort(key=len)
+        return solutions
 
     def reset(self):
         self.solution_line = []
