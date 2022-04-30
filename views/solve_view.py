@@ -50,7 +50,7 @@ class SolveView(arcade.View):
             ('RMB', 'clear triangles'),
             ("Space", 'solve'),
             ("R", 'reset board'),
-            ("arrows/WASD", 'change board size'),
+            ("arrows", 'change board size'),
             ("Enter", 'copy puzzle code'),
         ])
         arcade.set_background_color(cfg.bg_color[cfg.theme])
@@ -90,17 +90,16 @@ class SolveView(arcade.View):
         elif symbol == arcade.key.R:
             self.board.reset()
             self.gd.create_triangles()
-        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN,
-                        arcade.key.A, arcade.key.W, arcade.key.D, arcade.key.S):
+        elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN):
             board_width = self.board.width
             board_height = self.board.height
-            if symbol in (arcade.key.LEFT, arcade.key.A):
+            if symbol == arcade.key.LEFT:
                 board_width -= 1
-            elif symbol in (arcade.key.UP, arcade.key.W):
+            elif symbol == arcade.key.UP:
                 board_height += 1
-            elif symbol in (arcade.key.RIGHT, arcade.key.D):
+            elif symbol == arcade.key.RIGHT:
                 board_width += 1
-            elif symbol in (arcade.key.DOWN, arcade.key.S):
+            elif symbol == arcade.key.DOWN:
                 board_height -= 1
 
             if 1 <= board_width <= cfg.max_board_width and 1 <= board_height <= cfg.max_board_width:
