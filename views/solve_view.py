@@ -26,6 +26,7 @@ class SolveView(arcade.View):
         self.ui.enable()
 
         self.bottom_ui_panel = arcade.gui.UIBoxLayout(vertical=False)
+        self.top_ui_panel = arcade.gui.UIBoxLayout(vertical=False)
         self.add_ui_buttons()
 
         self.is_selecting_start = False
@@ -50,6 +51,21 @@ class SolveView(arcade.View):
         self.ui.add(arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
                                               align_y=cfg.bottom_panel_margin,
                                               child=self.bottom_ui_panel))
+
+        # assets downloaded from https://kenney.nl/
+        filenames = ('first.png', 'previous.png', 'next.png', 'last.png')
+        funcs = (self.show_first_solution, self.show_previous_solution,
+                 self.show_next_solution, self.show_last_solution)
+
+        for filename, func in zip(filenames, funcs):
+            texture = arcade.load_texture(f'assets/img/{filename}')
+            button = arcade.gui.UITextureButton(texture=texture, scale=0.5)
+            self.top_ui_panel.add(button)
+            button.on_click = func
+
+        self.ui.add(arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
+                                              align_y=cfg.top_panel_margin,
+                                              child=self.top_ui_panel))
 
     def reset_solutions(self):
         self.solutions = []
@@ -277,14 +293,18 @@ class SolveView(arcade.View):
         self.current_solution = n
         self.board.solution_line = self.solutions[n]
 
-    def show_first_solution(self):
+    # noinspection PyUnusedLocal
+    def show_first_solution(self, event=None):
         self.show_solution_n(0)
 
-    def show_previous_solution(self):
+    # noinspection PyUnusedLocal
+    def show_previous_solution(self, event=None):
         self.show_solution_n(self.current_solution - 1)
 
-    def show_next_solution(self):
+    # noinspection PyUnusedLocal
+    def show_next_solution(self, event=None):
         self.show_solution_n(self.current_solution + 1)
 
-    def show_last_solution(self):
+    # noinspection PyUnusedLocal
+    def show_last_solution(self, event=None):
         self.show_solution_n(len(self.solutions) - 1)
