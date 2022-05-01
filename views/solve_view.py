@@ -24,7 +24,7 @@ class SolveView(arcade.View):
             self.board.load_custom_puzzle(custom_puzzle_code)
 
         self.gd: Optional[GameDrawing] = None
-        self.create_game_drawing()
+        self.refresh_gui()
 
         self.ui = arcade.gui.UIManager()
         self.ui.enable()
@@ -40,9 +40,14 @@ class SolveView(arcade.View):
         self.mouse_x = 0
         self.mouse_y = 0
 
-    def create_game_drawing(self):
-        self.gd = GameDrawing(self.board, 110)
+    def refresh_gui(self, create_gd=True):
+        if create_gd:
+            self.gd = GameDrawing(self.board, 110)
+
+        self.reset_solutions()
+        self.board.solution_line = []
         self.gd.create_triangles()
+        self.board.estimate_difficulty()
 
     def add_ui_buttons(self):
         texts = ('Solve', 'Play', 'Move start', 'Move exit')
@@ -140,8 +145,7 @@ class SolveView(arcade.View):
             self.window.popup.set('Puzzle code copied')
         elif symbol == arcade.key.R:
             self.board.reset()
-            self.reset_solutions()
-            self.gd.create_triangles()
+            self.refresh_gui(create_gd=False)
         elif symbol == arcade.key.U:
             self.show_first_solution()
         elif symbol == arcade.key.I:
@@ -228,18 +232,14 @@ class SolveView(arcade.View):
             change_detected = True
 
         if change_detected:
-            self.reset_solutions()
-            self.board.solution_line = []
-            self.gd.create_triangles()
-            self.board.estimate_difficulty()
+            self.refresh_gui(create_gd=False)
 
     def resize_board(self, width: int, height: int):
         self.board = Board(width=width,
                            height=height,
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
-        self.create_game_drawing()
-        self.reset_solutions()
+        self.refresh_gui()
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         self.mouse_x = x
@@ -271,9 +271,7 @@ class SolveView(arcade.View):
                            bstart=bstart,
                            bexit=bexit)
         self.board.triangle_values = triangles
-        self.board.estimate_difficulty()
-        self.create_game_drawing()
-        self.reset_solutions()
+        self.refresh_gui()
 
     def select_lane_point(self, mouse_x: float, mouse_y: float) -> Tuple[int, int]:
         low_dist = float('inf')
