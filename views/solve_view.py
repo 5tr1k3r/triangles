@@ -164,8 +164,7 @@ class SolveView(arcade.View):
         self.is_selecting_exit = False
         self.window.set_mouse_visible(True)
 
-    # noinspection PyUnusedLocal
-    def solve_puzzle(self, event=None):
+    def solve_puzzle(self, _event=None):
         if not self.solutions:
             solutions = self.board.solve()
             if solutions:
@@ -174,8 +173,7 @@ class SolveView(arcade.View):
             else:
                 self.window.popup.set('No solution found!')
 
-    # noinspection PyUnusedLocal
-    def play_puzzle(self, event=None):
+    def play_puzzle(self, _event=None):
         solutions = self.board.solve()
         if not solutions:
             self.window.popup.set('Not solvable, cannot play this')
@@ -184,14 +182,12 @@ class SolveView(arcade.View):
         code = self.board.generate_code(solutions[0])
         self.window.vm.show_play_view_with_custom_puzzle(code)
 
-    # noinspection PyUnusedLocal
-    def move_start(self, event=None):
+    def move_start(self, _event=None):
         self.window.set_mouse_visible(False)
         self.window.popup.set('Selecting start...')
         self.is_selecting_start = True
 
-    # noinspection PyUnusedLocal
-    def move_exit(self, event=None):
+    def move_exit(self, _event=None):
         self.window.set_mouse_visible(False)
         self.window.popup.set('Selecting exit...')
         self.is_selecting_exit = True
@@ -293,18 +289,14 @@ class SolveView(arcade.View):
         self.current_solution = n
         self.board.solution_line = self.solutions[n]
 
-    # noinspection PyUnusedLocal
-    def show_first_solution(self, event=None):
+    def show_first_solution(self, _event=None):
         self.show_solution_n(0)
 
-    # noinspection PyUnusedLocal
-    def show_previous_solution(self, event=None):
+    def show_previous_solution(self, _event=None):
         self.show_solution_n(self.current_solution - 1)
 
-    # noinspection PyUnusedLocal
-    def show_next_solution(self, event=None):
+    def show_next_solution(self, _event=None):
         self.show_solution_n(self.current_solution + 1)
 
-    # noinspection PyUnusedLocal
-    def show_last_solution(self, event=None):
+    def show_last_solution(self, _event=None):
         self.show_solution_n(len(self.solutions) - 1)
