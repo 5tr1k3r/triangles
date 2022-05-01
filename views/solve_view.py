@@ -23,14 +23,18 @@ class SolveView(arcade.View):
             self.is_custom_puzzle = True
             self.board.load_custom_puzzle(custom_puzzle_code)
 
-        self.gd: Optional[GameDrawing] = None
-        self.refresh_gui()
-
         self.ui = arcade.gui.UIManager()
         self.ui.enable()
 
         self.bottom_ui_panel = arcade.gui.UIBoxLayout(vertical=False)
         self.top_ui_panel = arcade.gui.UIBoxLayout(vertical=False)
+        self.top_panel_anchor = arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
+                                                          align_y=cfg.top_panel_margin,
+                                                          child=self.top_ui_panel)
+
+        self.gd: Optional[GameDrawing] = None
+        self.refresh_gui()
+
         self.add_ui_buttons()
 
         self.is_selecting_start = False
@@ -73,11 +77,14 @@ class SolveView(arcade.View):
             self.top_ui_panel.add(button)
             button.on_click = func
 
-        self.ui.add(arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
-                                              align_y=cfg.top_panel_margin,
-                                              child=self.top_ui_panel))
+    def add_top_panel(self):
+        self.ui.add(self.top_panel_anchor)
+
+    def remove_top_panel(self):
+        self.ui.remove(self.top_panel_anchor)
 
     def reset_solutions(self):
+        self.remove_top_panel()
         self.solutions = []
         self.current_solution = 0
 
@@ -183,6 +190,7 @@ class SolveView(arcade.View):
             if solutions:
                 self.solutions = solutions
                 self.board.solution_line = solutions[0]
+                self.add_top_panel()
             else:
                 self.window.popup.set('No solution found!')
 
