@@ -134,6 +134,6 @@ def ponchik_decode(data):
     for i in range(height):
         for j in range(width):
             computed = get_triangle_value(i, j, all_sublines)
-            triangle_values.append(computed if bs[triangle_pos + i * width + j] == "0" else -computed)
+            triangle_values.append(computed if bs[triangle_pos + i * width + j] == "0" else 0)
 
     return width, height, start, exit_, triangle_values, solution_line
