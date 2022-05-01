@@ -83,3 +83,4 @@ menu_popup_color = arcade.color.RED
 button_width = 150
 button_height = 50
 bottom_panel_margin = 20
+start_exit_cursor_color = (0, 255, 0, 100)

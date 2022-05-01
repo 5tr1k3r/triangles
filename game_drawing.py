@@ -278,7 +278,7 @@ class GameDrawing:
 
     @staticmethod
     def draw_start_cursor(x: float, y: float):
-        arcade.draw_circle_filled(x, y, cfg.start_radius, cfg.board_color[cfg.theme])
+        arcade.draw_circle_filled(x, y, cfg.start_radius, cfg.start_exit_cursor_color)
 
     def draw_exit(self):
         if self.exit_data:
@@ -299,7 +299,7 @@ class GameDrawing:
     @staticmethod
     def draw_exit_cursor(x: float, y: float):
         arcade.draw_rectangle_filled(x, y, cfg.start_radius * 2, cfg.start_radius * 2,
-                                     cfg.board_color[cfg.theme])
+                                     cfg.start_exit_cursor_color)
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
         start_x = self.bottom_left_x + cfg.lane_width / 2
