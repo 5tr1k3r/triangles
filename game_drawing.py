@@ -345,7 +345,7 @@ class GameDrawing:
         # todo tidy up coords
         arcade.draw_text(f'SELECTING LANE POINT',
                          cfg.window_width - cfg.text_left_margin,
-                         cfg.solve_button_bottom_margin * 2 + 45 + 22,
+                         100,
                          anchor_x='right', anchor_y='center',
                          font_size=cfg.help_tip_font_size, color=cfg.help_tip_color)
 
@@ -353,7 +353,7 @@ class GameDrawing:
     def draw_solution_info(current_solution: int, total_count: int, solution_length: int):
         arcade.draw_text(f'{current_solution + 1}/{total_count} ({solution_length} long)',
                          cfg.window_width * 0.2,
-                         cfg.solve_button_bottom_margin * 2 + 45 + 22,
+                         100,
                          anchor_x='center', anchor_y='center',
                          font_size=20, color=arcade.color.GOLD)
 
@@ -468,18 +468,3 @@ class Popup:
             self.alpha = new_alpha
             if new_alpha == 0:
                 self.text = None
-
-
-class Button(arcade.Sprite):
-    def __init__(self, text: str, x: float, y: float):
-        super().__init__(f'assets/img/green_button03.png', hit_box_algorithm='None')
-        self.center_x = x
-        self.bottom = y
-
-        self.text = arcade.Text(text, self.center_x, self.bottom + self.height / 2,
-                                anchor_x='center', anchor_y='center',
-                                color=arcade.color.BLACK, font_size=cfg.solve_button_font_size)
-
-    def draw(self, **kwargs):
-        super().draw(**kwargs)
-        self.text.draw()

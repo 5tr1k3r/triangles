@@ -2,10 +2,11 @@ import math
 from typing import Tuple, List, Optional
 
 import arcade
+import arcade.gui
 import pyperclip
 
 import config as cfg
-from game_drawing import GameDrawing, Button
+from game_drawing import GameDrawing
 from models import Board, FullPath
 
 
@@ -21,21 +22,11 @@ class SolveView(arcade.View):
         self.gd: Optional[GameDrawing] = None
         self.create_game_drawing()
 
-        self.solve_button = Button('SOLVE', cfg.window_width / 2, cfg.solve_button_bottom_margin)
-        self.solve_button_list = arcade.SpriteList()
-        self.solve_button_list.append(self.solve_button)
+        self.ui = arcade.gui.UIManager()
+        self.ui.enable()
 
-        self.move_start_btn = Button('Move start', cfg.window_width * 0.2, cfg.solve_button_bottom_margin)
-        self.move_start_list = arcade.SpriteList()
-        self.move_start_list.append(self.move_start_btn)
-
-        self.move_exit_btn = Button('Move exit', cfg.window_width * 0.8, cfg.solve_button_bottom_margin)
-        self.move_exit_list = arcade.SpriteList()
-        self.move_exit_list.append(self.move_exit_btn)
-
-        self.play_btn = Button('Play', cfg.window_width * 0.5, cfg.solve_button_bottom_margin * 4)
-        self.play_btn_list = arcade.SpriteList()
-        self.play_btn_list.append(self.play_btn)
+        self.bottom_ui_panel = arcade.gui.UIBoxLayout(vertical=False)
+        self.add_ui_buttons()
 
         self.is_selecting_start = False
         self.is_selecting_exit = False
@@ -43,7 +34,20 @@ class SolveView(arcade.View):
         self.current_solution = 0
 
     def create_game_drawing(self):
-        self.gd = GameDrawing(self.board, 90 + cfg.solve_button_bottom_margin * 2)
+        self.gd = GameDrawing(self.board, 110)
+
+    def add_ui_buttons(self):
+        texts = ('Solve', 'Play', 'Move start', 'Move exit')
+        funcs = (self.solve_puzzle, self.play_puzzle, self.move_start, self.move_exit)
+
+        for text, func in zip(texts, funcs):
+            button = arcade.gui.UIFlatButton(text=text, width=cfg.button_width, height=cfg.button_height)
+            self.bottom_ui_panel.add(button)
+            button.on_click = func
+
+        self.ui.add(arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
+                                              align_y=cfg.bottom_panel_margin,
+                                              child=self.bottom_ui_panel))
 
     def reset_solutions(self):
         self.solutions = []
@@ -69,10 +73,9 @@ class SolveView(arcade.View):
         if self.board.solution_line:
             self.gd.draw_solution()
         self.gd.draw_board_difficulty()
-        self.solve_button.draw()
-        self.move_start_btn.draw()
-        self.move_exit_btn.draw()
-        self.play_btn.draw()
+
+        self.ui.draw()
+
         if self.is_selecting_lane_point():
             self.gd.draw_selecting_lane_point()
         if self.solutions:
@@ -131,7 +134,8 @@ class SolveView(arcade.View):
         self.is_selecting_start = False
         self.is_selecting_exit = False
 
-    def solve_puzzle(self):
+    # noinspection PyUnusedLocal
+    def solve_puzzle(self, event=None):
         if not self.solutions:
             solutions = self.board.solve()
             if solutions:
@@ -140,40 +144,32 @@ class SolveView(arcade.View):
             else:
                 self.window.popup.set('No solution found!')
 
+    # noinspection PyUnusedLocal
+    def play_puzzle(self, event=None):
+        solutions = self.board.solve()
+        if not solutions:
+            self.window.popup.set('Not solvable, cannot play this')
+            return
+
+        code = self.board.generate_code(solutions[0])
+        self.window.vm.show_play_view_with_custom_puzzle(code)
+
+    # noinspection PyUnusedLocal
+    def move_start(self, event=None):
+        self.window.popup.set('Selecting start...')
+        self.is_selecting_start = True
+
+    # noinspection PyUnusedLocal
+    def move_exit(self, event=None):
+        self.window.popup.set('Selecting exit...')
+        self.is_selecting_exit = True
+
     # noinspection PyUnresolvedReferences
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if self.is_selecting_lane_point():
             lane_x, lane_y = self.select_lane_point(x, y)
             self.move_start_or_exit(lane_x, lane_y)
             self.stop_selecting_lane_point()
-            return
-
-        solve_button_list = arcade.get_sprites_at_point((x, y), self.solve_button_list)
-        if solve_button_list:
-            self.solve_puzzle()
-            return
-
-        move_start_list = arcade.get_sprites_at_point((x, y), self.move_start_list)
-        if move_start_list:
-            self.window.popup.set('Selecting start...')
-            self.is_selecting_start = True
-            return
-
-        move_exit_list = arcade.get_sprites_at_point((x, y), self.move_exit_list)
-        if move_exit_list:
-            self.window.popup.set('Selecting exit...')
-            self.is_selecting_exit = True
-            return
-
-        play_list = arcade.get_sprites_at_point((x, y), self.play_btn_list)
-        if play_list:
-            solutions = self.board.solve()
-            if not solutions:
-                self.window.popup.set('Not solvable, cannot play this')
-                return
-
-            code = self.board.generate_code(solutions[0])
-            self.window.vm.show_play_view_with_custom_puzzle(code)
             return
 
         cells = arcade.get_sprites_at_point((x, y), self.gd.cells)
