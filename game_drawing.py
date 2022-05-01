@@ -250,6 +250,14 @@ class GameDrawing:
         self.draw_start()
         self.draw_exit()
 
+    def draw_board_without_start_and_exit(self):
+        with self.light_layer:
+            self.gboard_list.draw()
+            self.cells.draw()
+
+        self.draw_light_layer()
+        self.draw_triangles()
+
     def draw_light_layer(self):
         self.light_layer.draw(ambient_color=arcade.color.WHITE)
 
@@ -268,6 +276,10 @@ class GameDrawing:
 
         self.draw_circle_at_position(self.board.start[1], self.board.start[0], color)
 
+    @staticmethod
+    def draw_start_cursor(x: float, y: float):
+        arcade.draw_circle_filled(x, y, cfg.start_radius, cfg.board_color[cfg.theme])
+
     def draw_exit(self):
         if self.exit_data:
             arcade.draw_xywh_rectangle_filled(self.exit_data.rect_x,
@@ -283,6 +295,11 @@ class GameDrawing:
             # middle of the board
             color = cfg.solved_line_color if self.is_solved else cfg.board_color[cfg.theme]
             self.draw_rectangle_at_position(self.board.exit[1], self.board.exit[0], color)
+
+    @staticmethod
+    def draw_exit_cursor(x: float, y: float):
+        arcade.draw_rectangle_filled(x, y, cfg.start_radius * 2, cfg.start_radius * 2,
+                                     cfg.board_color[cfg.theme])
 
     def draw_circle_at_position(self, x: int, y: int, color: arcade.Color):
         start_x = self.bottom_left_x + cfg.lane_width / 2

@@ -32,6 +32,8 @@ class SolveView(arcade.View):
         self.is_selecting_exit = False
         self.solutions: List[FullPath] = []
         self.current_solution = 0
+        self.mouse_x = 0
+        self.mouse_y = 0
 
     def create_game_drawing(self):
         self.gd = GameDrawing(self.board, 110)
@@ -69,12 +71,23 @@ class SolveView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        self.gd.draw_board()
+        self.gd.draw_board_without_start_and_exit()
+
+        self.ui.draw()
+
+        if self.is_selecting_start:
+            self.gd.draw_start_cursor(self.mouse_x, self.mouse_y)
+        else:
+            self.gd.draw_start()
+
+        if self.is_selecting_exit:
+            self.gd.draw_exit_cursor(self.mouse_x, self.mouse_y)
+        else:
+            self.gd.draw_exit()
+
         if self.board.solution_line:
             self.gd.draw_solution()
         self.gd.draw_board_difficulty()
-
-        self.ui.draw()
 
         if self.is_selecting_lane_point():
             self.gd.draw_selecting_lane_point()
@@ -133,6 +146,7 @@ class SolveView(arcade.View):
     def stop_selecting_lane_point(self):
         self.is_selecting_start = False
         self.is_selecting_exit = False
+        self.window.set_mouse_visible(True)
 
     # noinspection PyUnusedLocal
     def solve_puzzle(self, event=None):
@@ -156,11 +170,13 @@ class SolveView(arcade.View):
 
     # noinspection PyUnusedLocal
     def move_start(self, event=None):
+        self.window.set_mouse_visible(False)
         self.window.popup.set('Selecting start...')
         self.is_selecting_start = True
 
     # noinspection PyUnusedLocal
     def move_exit(self, event=None):
+        self.window.set_mouse_visible(False)
         self.window.popup.set('Selecting exit...')
         self.is_selecting_exit = True
 
@@ -203,6 +219,10 @@ class SolveView(arcade.View):
                            bexit=cfg.board_exit)
         self.create_game_drawing()
         self.reset_solutions()
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        self.mouse_x = x
+        self.mouse_y = y
 
     def move_start_or_exit(self, x: int, y: int):
         bstart = self.board.start
