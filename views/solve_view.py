@@ -11,13 +11,17 @@ from models import Board, FullPath
 
 
 class SolveView(arcade.View):
-    def __init__(self):
+    def __init__(self, custom_puzzle_code: Optional[str] = None):
         super().__init__()
 
         self.board = Board(width=cfg.board_width,
                            height=cfg.board_height,
                            bstart=cfg.board_start,
                            bexit=cfg.board_exit)
+
+        if custom_puzzle_code is not None:
+            self.is_custom_puzzle = True
+            self.board.load_custom_puzzle(custom_puzzle_code)
 
         self.gd: Optional[GameDrawing] = None
         self.create_game_drawing()
@@ -38,6 +42,7 @@ class SolveView(arcade.View):
 
     def create_game_drawing(self):
         self.gd = GameDrawing(self.board, 110)
+        self.gd.create_triangles()
 
     def add_ui_buttons(self):
         texts = ('Solve', 'Play', 'Move start', 'Move exit')
@@ -72,6 +77,7 @@ class SolveView(arcade.View):
         self.current_solution = 0
 
     def on_show_view(self):
+        self.ui.enable()
         self.window.help.create_texts([
             ("Esc", 'quit to menu'),
             ('LMB', 'add triangles'),
@@ -83,6 +89,9 @@ class SolveView(arcade.View):
             ("Enter", 'copy puzzle code'),
         ])
         arcade.set_background_color(cfg.bg_color[cfg.theme])
+
+    def on_hide_view(self):
+        self.ui.disable()
 
     def on_draw(self):
         self.clear()
@@ -264,7 +273,6 @@ class SolveView(arcade.View):
         self.board.triangle_values = triangles
         self.board.estimate_difficulty()
         self.create_game_drawing()
-        self.gd.create_triangles()
         self.reset_solutions()
 
     def select_lane_point(self, mouse_x: float, mouse_y: float) -> Tuple[int, int]:

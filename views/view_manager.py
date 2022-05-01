@@ -43,6 +43,10 @@ class ViewManager:
         # because paths aren't generated and it works quickly regardless.
         self.window.show_view(PlayView(puzzle_code))
 
+    def show_solve_view_with_custom_puzzle(self, puzzle_code: str):
+        self.confirm_window_exists()
+        self.window.show_view(SolveView(puzzle_code))
+
     def show_solve_view(self):
         self.confirm_window_exists()
         solve_view = self.get_view_from_cache(SolveView)

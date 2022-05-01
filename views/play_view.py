@@ -3,6 +3,7 @@ import time
 from typing import List, Set, Optional
 
 import arcade
+import arcade.gui
 import pyperclip
 
 import config as cfg
@@ -28,6 +29,16 @@ class PlayView(arcade.View):
 
         self.gd = GameDrawing(self.board)
 
+        self.ui = arcade.gui.UIManager()
+        self.ui.enable()
+
+        self.solve_button = arcade.gui.UIFlatButton(text='Open in solver', width=200)
+        self.solve_button.on_click = self.open_in_solver
+
+        self.ui.add(arcade.gui.UIAnchorWidget(anchor_x='center', anchor_y='bottom',
+                                              align_y=cfg.bottom_panel_margin,
+                                              child=self.solve_button))
+
         self.is_show_solution = False
         self.line: List[Node] = [self.board.start]
         self.hints: List[Node] = []
@@ -44,6 +55,7 @@ class PlayView(arcade.View):
         self.start_new_puzzle()
 
     def on_show_view(self):
+        self.ui.enable()
         self.window.help.create_texts([
             ("Esc", 'quit to menu'),
             ("arrows/WASD", 'move line'),
@@ -56,6 +68,9 @@ class PlayView(arcade.View):
             ("Z", 'undo'),
         ])
         arcade.set_background_color(cfg.bg_color[cfg.theme])
+
+    def on_hide_view(self):
+        self.ui.disable()
 
     def start_new_puzzle(self):
         if not self.is_custom_puzzle:
@@ -87,6 +102,7 @@ class PlayView(arcade.View):
         if self.is_show_solution:
             self.gd.draw_solution()
         self.gd.draw_board_difficulty()
+        self.ui.draw()
         if self.is_custom_puzzle:
             self.gd.draw_custom_puzzle_text()
 
@@ -220,3 +236,7 @@ class PlayView(arcade.View):
                   f'{(sum(x.time_spent for x in self.puzzle_stats) / puzzles_solved):.1f}s, '
                   f'avg puzzle difficulty '
                   f'{(sum(x.difficulty for x in self.puzzle_stats) / puzzles_solved):.1f}')
+
+    def open_in_solver(self, _event=None):
+        code = self.board.generate_code()
+        self.window.vm.show_solve_view_with_custom_puzzle(code)
