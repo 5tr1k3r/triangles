@@ -3,3 +3,4 @@ pyglet~=2.0.a2
 Pillow~=9.1.0
 toml~=0.10.2
 pyperclip~=1.8.2
+numpy~=1.20.2

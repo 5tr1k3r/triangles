@@ -1,6 +1,7 @@
 import random
 import time
 from typing import List, Set, Optional
+import numpy as np
 
 import arcade
 import arcade.gui
@@ -52,9 +53,18 @@ class PlayView(arcade.View):
         self.was_given_space_warning = False
         self.puzzle_stats: List[PuzzleStats] = []
 
+        self.mouse_x = cfg.window_width / 2
+        self.mouse_y = cfg.window_height / 2
+        self.mouse_anchor_x = 0
+        self.mouse_anchor_y = 0
+        self.is_mouse_mode = False
+        self.is_keyboard_mode = False
+        self.mouse_directions = None
+
         self.start_new_puzzle()
 
     def on_show_view(self):
+        self.window.set_mouse_visible(False)
         self.ui.enable()
         self.window.help.create_texts([
             ("Esc", 'quit to menu'),
@@ -70,6 +80,7 @@ class PlayView(arcade.View):
         arcade.set_background_color(cfg.bg_color[cfg.theme])
 
     def on_hide_view(self):
+        self.window.set_mouse_visible(True)
         self.ui.disable()
 
     def start_new_puzzle(self):
@@ -91,6 +102,10 @@ class PlayView(arcade.View):
         self.puzzle_index += 1
         self.was_solution_shown = False
         self.was_given_space_warning = False
+        self.is_mouse_mode = False
+        self.is_keyboard_mode = False
+        self.mouse_anchor_x = 0
+        self.mouse_anchor_y = 0
 
     def on_draw(self):
         self.clear()
@@ -106,8 +121,78 @@ class PlayView(arcade.View):
         if self.is_custom_puzzle:
             self.gd.draw_custom_puzzle_text()
 
+        if self.is_mouse_mode:
+            x, y = self.normalize_mouse_coords(self.mouse_x, self.mouse_y)
+            self.gd.draw_mouse_line_segment(self.mouse_anchor_x, self.mouse_anchor_y, x, y)
+        self.gd.draw_mouse_cursor(self.mouse_x, self.mouse_y)
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        if self.is_mouse_mode:
+            max_step = 100
+
+            # 1 0 up
+            # 0 1 right
+            # -1 0 down
+            # 0 -1 left
+            if self.mouse_directions is None:
+                self.mouse_directions = self.get_available_directions()
+
+            x_array = self.mouse_directions[:, 0]
+            y_array = self.mouse_directions[:, 1]
+            min_x = x_array.min()
+            max_x = x_array.max()
+            min_y = y_array.min()
+            max_y = y_array.max()
+
+            start_x, start_y = self.gd.glines[self.mouse_anchor_x][self.mouse_anchor_y]
+
+            if start_x + max_step * min_x <= x <= start_x + max_step * max_x:
+                self.mouse_x += dx
+            if start_y + max_step * min_y <= y <= start_y + max_step * max_y:
+                self.mouse_y += dy
+
+        else:
+            self.mouse_x = x
+            self.mouse_y = y
+
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        # right click
+        if button == 4:
+            self.stop_mouse_mode()
+            return
+
+        if not self.is_keyboard_mode and self.is_click_inside_start_zone(x, y):
+            self.start_mouse_mode()
+
+            self.mouse_anchor_x, self.mouse_anchor_y = self.board.start
+
+    @staticmethod
+    def normalize_mouse_coords(x: float, y: float):
+        # todo
+        return x, y
+
     def is_line_present(self) -> bool:
         return len(self.line) > 1
+
+    def start_mouse_mode(self):
+        if not self.is_mouse_mode:
+            print('starting mouse mode')
+        self.is_mouse_mode = True
+
+    def stop_mouse_mode(self):
+        if self.is_mouse_mode:
+            print('stopping mouse mode')
+        self.is_mouse_mode = False
+
+    def start_keyboard_mode(self):
+        if not self.is_keyboard_mode:
+            print('starting keyboard mode')
+        self.is_keyboard_mode = True
+
+    def stop_keyboard_mode(self):
+        if self.is_keyboard_mode:
+            print('stopping keyboard mode')
+        self.is_keyboard_mode = False
 
     def is_need_to_show_hints(self) -> bool:
         return self.hints and not self.is_show_solution and not self.is_solved
@@ -144,8 +229,12 @@ class PlayView(arcade.View):
             self.is_show_solution = not self.is_show_solution
         elif symbol == arcade.key.R:
             self.line = [self.board.start]
+            self.stop_keyboard_mode()
         elif symbol in (arcade.key.LEFT, arcade.key.UP, arcade.key.RIGHT, arcade.key.DOWN,
                         arcade.key.A, arcade.key.W, arcade.key.D, arcade.key.S):
+            if self.is_mouse_mode:
+                return
+
             x, y = self.line[-1]
 
             if symbol in (arcade.key.LEFT, arcade.key.A):
@@ -162,6 +251,12 @@ class PlayView(arcade.View):
                 self.line = self.line[:-1]
             elif self.is_valid_move(move):
                 self.line += (move,)
+
+            if self.is_line_present():
+                self.start_keyboard_mode()
+            else:
+                self.stop_keyboard_mode()
+
         elif symbol == arcade.key.SPACE:
             if self.is_custom_puzzle:
                 self.window.popup.set('Not available in custom puzzle mode')
@@ -189,10 +284,10 @@ class PlayView(arcade.View):
             self.undo()
 
     def is_reverting(self, move: Node) -> bool:
-        return len(self.line) >= 2 and move == self.line[-2]
+        return self.is_line_present() and move == self.line[-2]
 
     def undo(self):
-        if len(self.line) >= 2:
+        if self.is_line_present():
             self.line = self.line[:-1]
 
     def is_valid_move(self, move: Node) -> bool:
@@ -240,3 +335,17 @@ class PlayView(arcade.View):
     def open_in_solver(self, _event=None):
         code = self.board.generate_code()
         self.window.vm.show_solve_view_with_custom_puzzle(code)
+
+    def is_click_inside_start_zone(self, x: float, y: float):
+        i, j = self.board.start
+        start_x, start_y = self.gd.glines[i][j]
+        half_width = cfg.start_radius * 1.1
+        return (start_x - half_width <= x <= start_x + half_width and
+                start_y - half_width <= y <= start_y + half_width)
+
+    def get_available_directions(self):
+        x, y = self.mouse_anchor_x, self.mouse_anchor_y
+        all_directions = [(x - 1, y), (x, y + 1), (x + 1, y), (x, y - 1)]
+
+        return np.array([(np.sign(x), np.sign(y)) for x, y in all_directions if 0 <= x <= self.board.width and
+                         0 <= y <= self.board.height and (x, y) not in self.line])

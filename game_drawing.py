@@ -404,6 +404,15 @@ class GameDrawing:
                 arcade.draw_circle_filled(x + cfg.cell_size / 2, y + cfg.cell_size / 2,
                                           10, colors[n])
 
+    @staticmethod
+    def draw_mouse_cursor(x: float, y: float):
+        arcade.draw_circle_filled(x, y, cfg.start_radius * 0.9, (0, 0, 0, 70))
+        arcade.draw_circle_filled(x, y, cfg.start_radius * 0.7, (255, 255, 255, 100))
+
+    def draw_mouse_line_segment(self, anchor_x: int, anchor_y: int, x2: float, y2: float):
+        x1, y1 = self.glines[anchor_x][anchor_y]
+        arcade.draw_line(x1, y1, x2, y2, cfg.line_color[cfg.theme], line_width=2)
+
 
 class MenuOption:
     def __init__(self, text: str, x: float, y: float):
