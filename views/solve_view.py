@@ -190,6 +190,7 @@ class SolveView(arcade.View):
             if solutions:
                 self.solutions = solutions
                 self.board.solution_line = solutions[0]
+                self.board.find_partitions()
                 self.add_top_panel()
             else:
                 self.window.popup.set('No solution found!')
@@ -302,6 +303,7 @@ class SolveView(arcade.View):
 
         self.current_solution = n
         self.board.solution_line = self.solutions[n]
+        self.board.find_partitions()
 
     def show_first_solution(self, _event=None):
         self.show_solution_n(0)

@@ -52,6 +52,7 @@ class Board:
         self.solution_line: List[Node] = []
         self.pg: Optional[PathGenerator] = None
         self.difficulty: int = 0
+        self.partitions: List[Set[Node]] = []
 
     def generate_paths(self, min_len=None):
         if min_len is None:
@@ -160,6 +161,63 @@ class Board:
         self.solution_line = []
         self.triangle_values = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.estimate_difficulty()
+
+    def find_partitions(self, line=None):
+        if line is None:
+            line = self.solution_line
+
+        blocked = set()
+        py, px = line[0]
+        for y, x in line[1:]:
+            # horizontal line segment
+            if py == y:
+                mx = min(x, px)
+                blocked |= {((y - 1, mx), (y, mx)), ((y, mx), (y - 1, mx))}
+            # vertical line segment
+            else:
+                my = min(y, py)
+                blocked |= {((my, x - 1), (my, x)), ((my, x), (my, x - 1))}
+
+            py, px = y, x
+
+        seen = set()
+        result = []
+        queue = []
+
+        while len(seen) < self.width * self.height:
+            partition = set()
+            found_start = False
+            for y in range(self.height):
+                for x in range(self.width):
+                    if (y, x) not in seen:
+                        queue = [(y, x)]
+                        found_start = True
+                        break
+
+                if found_start:
+                    break
+
+            while queue:
+                y, x = queue.pop(0)
+                if (y, x) in seen:
+                    continue
+
+                partition.add((y, x))
+                seen.add((y, x))
+
+                for dy in (-1, 1):
+                    ny = y + dy
+                    if 0 <= ny < self.height and ((y, x), (ny, x)) not in blocked:
+                        queue.append((ny, x))
+
+                for dx in (-1, 1):
+                    nx = x + dx
+                    if 0 <= nx < self.width and ((y, x), (y, nx)) not in blocked:
+                        queue.append((y, nx))
+
+            result.append(partition)
+
+        self.partitions = result
 
 
 class PathGenerator:
