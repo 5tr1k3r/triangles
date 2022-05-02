@@ -390,6 +390,20 @@ class GameDrawing:
             cell: Cell
             cell.reload_texture()
 
+    def draw_partition_markers(self):
+        colors = (arcade.color.GREEN, arcade.color.RED,
+                  arcade.color.BLUE, arcade.color.WHITE,
+                  arcade.color.GOLD, arcade.color.YELLOW,
+                  arcade.color.PURPLE, arcade.color.LEMON,
+                  arcade.color.LAWN_GREEN, arcade.color.KHAKI,
+                  arcade.color.DUKE_BLUE, arcade.color.GRAY)
+
+        for n, partition in enumerate(self.board.partitions):
+            for i, j in partition:
+                x, y = self.gcells[i][j]
+                arcade.draw_circle_filled(x + cfg.cell_size / 2, y + cfg.cell_size / 2,
+                                          10, colors[n])
+
 
 class MenuOption:
     def __init__(self, text: str, x: float, y: float):
